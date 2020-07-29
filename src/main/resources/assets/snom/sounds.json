@@ -1,0 +1,48 @@
+{
+  "book_flip": {
+    "category": "player",
+    "subtitle": "snom.subtitle.flip_book",
+    "sounds": [
+      "snom:book/book_flip_1",
+      "snom:book/book_flip_2",
+      "snom:book/book_flip_3",
+      "snom:book/book_flip_4",
+      "snom:book/book_flip_5",
+      "snom:book/book_flip_6"
+    ]
+  },
+  "book_close": {
+    "category": "player",
+    "subtitle": "snom.subtitle.close_book",
+    "sounds": [
+      "snom:book/book_close_1",
+      "snom:book/book_close_2"
+    ]
+  },
+  "control_smash": {
+    "category": "ambient",
+    "subtitle": "snom.subtitle.smash",
+    "sounds": [
+      "snom:control/smash_1"
+    ]
+  },
+  "control_loop": {
+    "category": "ambient",
+    "subtitle": "snom.subtitle.controlling",
+    "sounds": [
+      {
+        "name": "snom:control/control_loop",
+        "stream": true
+      }
+    ]
+  },
+  "start_searching": {
+    "category": "player",
+    "subtitle": "snom.subtitle.searching",
+    "sounds": [
+      "snom:clairvoyance/start_searching_1",
+      "snom:clairvoyance/start_searching_2",
+      "snom:clairvoyance/start_searching_3"
+    ]
+  }
+}

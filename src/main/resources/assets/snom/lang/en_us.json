@@ -1,0 +1,13 @@
+{
+  "item.snom.soulnomicon": "Soulnomicon",
+  "death.attack.consumedSoul": "%1$s ran out of soul",
+  "death.attack.smash": "%1$s got smashed really hard by %2$s",
+  "clairvoyance.click.item": "§eClick To start searching this item",
+  "clairvoyance.filter": "§eIgnore NBT tag",
+  "ability.none": "Toggle Ability",
+  "ability.control": "Control",
+  "ability.separation": "Separation",
+  "ability.clairvoyance": "Clairvoyance",
+  "snom.subtitle.flip_book": "Flipping Book",
+  "snom.subtitle.close_book": "Closing Book"
+}
