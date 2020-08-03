@@ -8,6 +8,7 @@ import com.pier.snom.client.gui.ClairvoyanceScreen;
 import com.pier.snom.network.PacketManager;
 import com.pier.snom.network.client.PacketUpdateClairvoyance;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.IInventory;
@@ -47,12 +48,14 @@ public class ClairvoyanceAbility implements ISoulAbility<ClairvoyanceAbilityRend
             this.knownItems.add(s);
     }
 
-    public void startSearch(ItemStack stack, boolean ignoreNBT)
+    public void startSearch(PlayerEntity player,ISoulPlayer soulPlayer,ItemStack stack, boolean ignoreNBT)
     {
         this.searchStack = stack.copy();
         this.remainingSearchTime = 100;
         this.ignoreNBT = ignoreNBT;
         this.clairvoyanceScan.startScan();
+        soulPlayer.consumeSoul(player,1F);
+
     }
 
     private boolean isItemNew(ItemStack stack)
@@ -150,7 +153,7 @@ public class ClairvoyanceAbility implements ISoulAbility<ClairvoyanceAbilityRend
 
 
     @Override
-    public boolean active(ISoulPlayer soulPlayer, PlayerEntity player)
+    public boolean cast(ISoulPlayer soulPlayer, PlayerEntity player)
     {
         if(player.world.isRemote)
         {
@@ -163,7 +166,17 @@ public class ClairvoyanceAbility implements ISoulAbility<ClairvoyanceAbilityRend
     @Override
     public float soulUsePreview(ISoulPlayer soulPlayer, PlayerEntity player)
     {
-        return 0;
+        if(player instanceof AbstractClientPlayerEntity){
+            return Minecraft.getInstance().currentScreen instanceof ClairvoyanceScreen ? -1F : 0F;
+        }
+        return 1F;
+
+    }
+
+    @Override
+    public boolean shouldRegenPlayer(PlayerEntity player, ISoulPlayer iSoulPlayer)
+    {
+        return true;
     }
 
     @Override

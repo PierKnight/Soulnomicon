@@ -58,10 +58,9 @@ public class SavedBodyPlayers extends WorldSavedData
 
         if(bodyData != null)
         {
-            PlayerBodyEntity body = new PlayerBodyEntity(player.world);
+            PlayerBodyEntity body = new PlayerBodyEntity(player.world,player.rotationYaw, player.rotationYawHead, player.rotationPitch);
             body.read(bodyData);
             player.world.addEntity(body);
-
             playerBodies.remove(player.getUniqueID());
             this.markDirty();
 

@@ -70,7 +70,7 @@ public class ClairvoyanceScreen extends ContainerScreen<ClairvoyanceScreen.Clair
         if(!stack.isEmpty() && p_mouseClicked_5_ == 0)
         {
             player.swingArm(Hand.MAIN_HAND);
-            player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(iSoulPlayer -> iSoulPlayer.getAbilitiesManager().getClairvoyanceAbility().startSearch(stack, checkboxButton.isChecked()));
+            player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(iSoulPlayer -> iSoulPlayer.getAbilitiesManager().getClairvoyanceAbility().startSearch(player,iSoulPlayer,stack, checkboxButton.isChecked()));
             minecraft.world.playSound(player, player.getPosX(), player.getPosY(), player.getPosZ(), ModSounds.CLAIRVOYANCE_START, SoundCategory.PLAYERS, 1.2F, 1F);
             PacketManager.channel.sendToServer(new PacketStartSearch(stack, checkboxButton.isChecked()));
             onClose();

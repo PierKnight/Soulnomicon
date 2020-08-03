@@ -15,7 +15,7 @@ public class BookFlyingAroundAnimation extends BaseAnimation
 
     public BookFlyingAroundAnimation()
     {
-        super(12);
+        super(8);
     }
 
     @Override
@@ -34,9 +34,7 @@ public class BookFlyingAroundAnimation extends BaseAnimation
     @Override
     public float getAnimationF(float partialTicks)
     {
-        float prev = Math.min(prevTicks, 9F);
-        float tick = Math.min(ticks, 9F);
-        return MathHelper.lerp(partialTicks, prev, tick) / 9F;
+        return super.getAnimationF(partialTicks);
     }
 
     @Override

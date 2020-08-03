@@ -17,6 +17,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -61,7 +62,6 @@ public class ModRegistry
     @SubscribeEvent
     public static void registerParticleFactories(ParticleFactoryRegisterEvent event)
     {
-
         ModParticles.registerParticles();
     }
 
@@ -74,4 +74,10 @@ public class ModRegistry
         event.getModelRegistry().put(location, new SoulnomiconBakedModel(original));
     }
 
+    @OnlyIn(Dist.CLIENT)
+    @SubscribeEvent
+    public static void stitchTexture(TextureStitchEvent.Pre event)
+    {
+        //event.addSprite(SoulnomiconRenderer.DEATH_NOTE);
+    }
 }

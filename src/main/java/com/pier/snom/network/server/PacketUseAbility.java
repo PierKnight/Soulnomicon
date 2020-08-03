@@ -53,7 +53,7 @@ public class PacketUseAbility
             {
                 ISoulAbility ability = soulPlayer.getAbilitiesManager().getSelectedAbility();
                 if(ability != null && ability.canUse(player, soulPlayer))
-                    if(soulPlayer.getAbilitiesManager().getSelectedAbility().active(soulPlayer, player) && player instanceof ServerPlayerEntity)
+                    if(soulPlayer.getAbilitiesManager().getSelectedAbility().cast(soulPlayer, player) && player instanceof ServerPlayerEntity)
                         SoulPlayer.updatePlayerData(player);
             });
         }

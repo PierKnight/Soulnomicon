@@ -2,18 +2,23 @@ package com.pier.snom.client.render.entity;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.pier.snom.capability.render.SeparationAbilityRenderer;
 import com.pier.snom.client.render.model.AnimatedPlayerModel;
 import com.pier.snom.client.render.model.SoulPlayerModel;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 
 @OnlyIn(Dist.CLIENT)
@@ -40,27 +45,18 @@ public class RenderSoulPlayer extends RenderAnimatedPlayer
     @Override
     public void render(AbstractClientPlayerEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn)
     {
-
-/*
-        if(entityIn.isAlive())
-        {
-            float f = partialTicks * 1.1415927F * -0.1F;
-
-            matrixStackIn.push();
-
-            matrixStackIn.translate(0, MathHelper.sin(f) * 0.025F, 0F);
-
-            entityIn.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(soulPlayer ->
-            {
-                float alpha = 1F - soulPlayer.getAbilitiesManager().getSeparation().deathSoulPlayerAnimation.getAnimationF();
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 0.4F * alpha);
-            });
-            */
+        SeparationAbilityRenderer.renderBlocks(Minecraft.getInstance(),entityIn.world,entityIn,entityIn.getPositionVec(),matrixStackIn);
         if(entityIn.isAlive())
             super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
-        // matrixStackIn.pop();
-        //    }
+     }
 
+    @Nullable
+    @Override
+    protected RenderType func_230042_a_(AbstractClientPlayerEntity p_230042_1_, boolean p_230042_2_, boolean p_230042_3_)
+    {
+     //   System.out.println("test");
+        ResourceLocation resourcelocation = this.getEntityTexture(p_230042_1_);
+        return RenderType.getEntityTranslucent(resourcelocation);
     }
 
     @Override

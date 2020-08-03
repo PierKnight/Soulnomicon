@@ -23,16 +23,30 @@ public interface ISoulAbility<T extends AbilityRenderer>
      * @param soulPlayer soul player capability
      * @return if true packets will be sent to sync datas between different clients and server
      */
-    boolean active(ISoulPlayer soulPlayer, PlayerEntity player);
+    boolean cast(ISoulPlayer soulPlayer, PlayerEntity player);
 
     /**
      * @return the amount of soul that this ability gives/consumes under certain conditions
      */
     float soulUsePreview(ISoulPlayer soulPlayer, PlayerEntity player);
 
+    /**
+     *  if false the player will not regen his soul health when this ability is selected
+     */
+    boolean shouldRegenPlayer(PlayerEntity player,ISoulPlayer iSoulPlayer);
+
+    /**
+     * if false the player can't interact with the soulnomicon, inventory and hotbar.
+     */
+    default boolean shouldBlockInteractions(PlayerEntity player, ISoulPlayer iSoulPlayer)
+    {
+        return false;
+    }
+
     void writeToNBT(CompoundNBT nbt);
 
     void readFromNBT(CompoundNBT nbt);
+
 
     /**
      * checks if this ability is currently selected by the player
@@ -46,7 +60,7 @@ public interface ISoulAbility<T extends AbilityRenderer>
     }
 
     /**
-     * @return the renderer used to render custom animation for the ability
+     * @return the renderer used to render custom animations for the ability
      */
     T getRenderer();
 

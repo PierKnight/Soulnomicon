@@ -3,6 +3,7 @@ package com.pier.snom.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.pier.snom.capability.SoulPlayerProvider;
 import com.pier.snom.capability.abilities.EnumAbility;
+import com.pier.snom.client.KeyBoardHandler;
 import com.pier.snom.network.PacketManager;
 import com.pier.snom.network.server.PacketFlySoulnomicon;
 import com.pier.snom.network.server.PacketSetAbility;
@@ -25,12 +26,11 @@ public class AbilityWheelScreen extends Screen
 
     private final PlayerEntity player;
 
-
     public AbilityWheelScreen(PlayerEntity player)
     {
         super(null);
         this.player = player;
-        this.passEvents = true;
+        this.passEvents = false;
         onOpen();
 
     }
@@ -118,6 +118,15 @@ public class AbilityWheelScreen extends Screen
         });
     }
 
+    @Override
+    public void tick()
+    {
+
+        if(!KeyBoardHandler.isHoldingUseButton)
+            onClose();
+
+    }
+
     private static int getSelectedAbilityIndex(double mouseAngle)
     {
         double anglePiece = (Math.PI * 2D) / EnumAbility.values().length;
@@ -137,23 +146,6 @@ public class AbilityWheelScreen extends Screen
     public boolean isPauseScreen()
     {
         return false;
-    }
-
-    @Override
-    public boolean keyReleased(int keyCode, int scanCode, int modifiers)
-    {
-        if(keyCode == minecraft.gameSettings.keyBindUseItem.getKey().getKeyCode())
-            onClose();
-
-        return true;
-    }
-
-    @Override
-    public boolean mouseReleased(double p_mouseReleased_1_, double p_mouseReleased_3_, int p_mouseReleased_5_)
-    {
-        if(p_mouseReleased_5_ == minecraft.gameSettings.keyBindUseItem.getKey().getKeyCode())
-            onClose();
-        return true;
     }
 
 

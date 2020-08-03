@@ -184,7 +184,7 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
     }
 
     @Override
-    public boolean active(ISoulPlayer soulPlayer, PlayerEntity player)
+    public boolean cast(ISoulPlayer soulPlayer, PlayerEntity player)
     {
 
         World world = player.world;
@@ -271,6 +271,12 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
         return 0F;
     }
 
+    @Override
+    public boolean shouldRegenPlayer(PlayerEntity player, ISoulPlayer iSoulPlayer)
+    {
+        return !isControllingEntity();
+    }
+
     public Vec2f getRotationYawPitch(PlayerEntity player, Entity entity, float partialTicks)
     {
         Vec3d entityPosition = getEntityVec(entity, partialTicks);
@@ -297,6 +303,12 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
     {
         this.distance = nbt.getDouble("distance");
         this.selectedEntityID = nbt.getInt("selectedEntityID");
+    }
+
+    @Override
+    public boolean shouldBlockInteractions(PlayerEntity player, ISoulPlayer iSoulPlayer)
+    {
+        return this.isControllingEntity();
     }
 
     @Override

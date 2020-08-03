@@ -2,6 +2,8 @@
   "item.snom.soulnomicon": "Soulnomicon",
   "death.attack.consumedSoul": "%1$s ran out of soul",
   "death.attack.smash": "%1$s got smashed really hard by %2$s",
+  "key.categories.snom": "Soulnomicon",
+  "key.soul.activation": "Ability Cast Key",
   "clairvoyance.click.item": "§eClick To start searching this item",
   "clairvoyance.filter": "§eIgnore NBT tag",
   "ability.none": "Toggle Ability",

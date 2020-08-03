@@ -90,7 +90,7 @@ public class SeparationAbility implements ISoulAbility<SeparationAbilityRenderer
             oldGameType = player.interactionManager.getGameType();
 
             //spawn player's body
-            PlayerBodyEntity bodyEntity = new PlayerBodyEntity(world);
+            PlayerBodyEntity bodyEntity = new PlayerBodyEntity(world,player.rotationYaw, player.rotationYawHead, player.rotationPitch);
             bodyEntity.setPlayerSoul(player);
             world.addEntity(bodyEntity);
 
@@ -158,7 +158,7 @@ public class SeparationAbility implements ISoulAbility<SeparationAbilityRenderer
 
             if(player.world.getGameTime() % 10 == 0 && oldGameType != GameType.CREATIVE)
             {
-                soulPlayer.consumeSoul(player, 0.25F);
+                soulPlayer.useSoulHealth(player, -0.25F);
             }
 
         }
@@ -166,7 +166,7 @@ public class SeparationAbility implements ISoulAbility<SeparationAbilityRenderer
     }
 
     @Override
-    public boolean active(ISoulPlayer soulPlayer, PlayerEntity player)
+    public boolean cast(ISoulPlayer soulPlayer, PlayerEntity player)
     {
         if(player instanceof ServerPlayerEntity)
             handleSeparation((ServerPlayerEntity) player, true);
@@ -181,6 +181,18 @@ public class SeparationAbility implements ISoulAbility<SeparationAbilityRenderer
         return 0F;
     }
 
+    @Override
+    public boolean shouldRegenPlayer(PlayerEntity player, ISoulPlayer iSoulPlayer)
+    {
+        return !this.isSeparated;
+    }
+
+    @Override
+    public boolean shouldBlockInteractions(PlayerEntity player, ISoulPlayer iSoulPlayer)
+    {
+        return this.isSeparated;
+    }
+
     public static boolean isSeparated(PlayerEntity player)
     {
         AtomicBoolean atomicBoolean = new AtomicBoolean();
@@ -192,7 +204,7 @@ public class SeparationAbility implements ISoulAbility<SeparationAbilityRenderer
 
 
     @Nullable
-    private static PlayerBodyEntity getPlayerBodyBody(PlayerEntity player)
+    public static PlayerBodyEntity getPlayerBodyBody(PlayerEntity player)
     {
 
         World world = player.world;

@@ -18,6 +18,9 @@ public class ModSounds
     {
         registry.register(BOOK_FLIP);
         registry.register(BOOK_CLOSE);
+        registry.register(CLAIRVOYANCE_START);
+        registry.register(CONTROLLING);
+        registry.register(CONTROL_SMASH);
     }
 
 

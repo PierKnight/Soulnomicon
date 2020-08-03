@@ -1,6 +1,7 @@
 package com.pier.snom.client.particle;
 
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.pier.snom.capability.abilities.SeparationAbility;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -105,27 +106,16 @@ public class SoulFlameParticle extends SpriteTexturedParticle
     }
 
     @Override
-    public void renderParticle(@Nonnull IVertexBuilder buffer,@Nonnull ActiveRenderInfo renderInfo, float partialTicks)
+    public void renderParticle(@Nonnull IVertexBuilder buffer, @Nonnull ActiveRenderInfo renderInfo, float partialTicks)
     {
         PlayerEntity player = Minecraft.getInstance().player;
 
-        float f = getScalingF(partialTicks) * 0.65F;
+        double distance = player != null ? player.getEyePosition(partialTicks).distanceTo(new Vec3d(this.posX,this.posY,this.posZ)) : 0D;
 
-
-        if(player != null && !renderInfo.isThirdPerson() && renderInfo.getRenderViewEntity().getUniqueID().equals(soulPlayerUUID))
-        {
-            Vec3d eyePos = player.getEyePosition(partialTicks);
-            Vec3d particlePos = new Vec3d(posX, posY, posZ);
-            float distanceFromParticle = (float) eyePos.distanceTo(particlePos);
-            if(distanceFromParticle <= 0.6F)
-                f *= distanceFromParticle / 1.2F;
-
-        }
-
-
-        this.particleAlpha = f;
-        super.renderParticle(buffer, renderInfo, partialTicks);
+        if(renderInfo.isThirdPerson() || player != null && (!SeparationAbility.isSeparated(player) || distance > 1D))
+            super.renderParticle(buffer, renderInfo, partialTicks);
     }
+
 
     @OnlyIn(Dist.CLIENT)
     public static class Factory implements IParticleFactory<SoulPlayerParticleData>
@@ -145,4 +135,5 @@ public class SoulFlameParticle extends SpriteTexturedParticle
             return flameParticle;
         }
     }
+
 }

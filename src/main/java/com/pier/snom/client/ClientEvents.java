@@ -5,11 +5,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.pier.snom.SoulnomiconMain;
 import com.pier.snom.capability.ISoulPlayer;
 import com.pier.snom.capability.SoulPlayerProvider;
+import com.pier.snom.capability.abilities.AbilitiesManager;
 import com.pier.snom.capability.abilities.EnumAbility;
 import com.pier.snom.capability.abilities.ISoulAbility;
 import com.pier.snom.capability.abilities.SeparationAbility;
 import com.pier.snom.capability.render.AbilityRenderer;
-import com.pier.snom.capability.render.SeparationAbilityRenderer;
 import com.pier.snom.client.particle.SoulPlayerParticleData;
 import com.pier.snom.client.render.entity.RenderAnimatedPlayer;
 import com.pier.snom.client.render.entity.RenderSoulPlayer;
@@ -20,12 +20,15 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -33,10 +36,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
-import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
@@ -55,12 +55,6 @@ public class ClientEvents
     public static final ResourceLocation ICONS = new ResourceLocation(SoulnomiconMain.ID, "textures/gui/icons.png");
 
 
-    public static void initRendering()
-    {
-        SeparationAbilityRenderer.initRenderer();
-    }
-
-
     @SubscribeEvent
     public static void renderPlayerCustomModel(RenderLivingEvent.Pre<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> event)
     {
@@ -69,7 +63,7 @@ public class ClientEvents
 
         PlayerEntity watchingPlayer = Minecraft.getInstance().player;
 
-        if(event.getEntity() instanceof AbstractClientPlayerEntity)
+        if(event.getEntity() instanceof AbstractClientPlayerEntity && watchingPlayer != null)
         {
             AbstractClientPlayerEntity renderedPlayer = (AbstractClientPlayerEntity) event.getEntity();
 
@@ -78,7 +72,11 @@ public class ClientEvents
                 renderedPlayer.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(soulPlayer ->
                 {
                     //prevents to see spectators as a soul player
-                    if(!soulPlayer.getAbilitiesManager().getSeparation().isSeparated && renderedPlayer.isSpectator() && SeparationAbility.isSeparated(watchingPlayer))
+                    if(renderedPlayer.isSpectator() && SeparationAbility.isSeparated(watchingPlayer))
+                        event.setCanceled(true);
+
+                    //prevents to see soul players in spectator
+                    if(watchingPlayer.isSpectator() && soulPlayer.getAbilitiesManager().getSeparation().isSeparated)
                         event.setCanceled(true);
 
                     ISoulAbility<?> ability = soulPlayer.getAbilitiesManager().getSelectedAbility();
@@ -102,7 +100,7 @@ public class ClientEvents
     public static void renderPlayerCustomHand(RenderHandEvent event)
     {
         Minecraft mc = Minecraft.getInstance();
-        ClientPlayerEntity player = Minecraft.getInstance().player;
+        ClientPlayerEntity player = mc.player;
         if(player == null)
             return;
 
@@ -116,16 +114,65 @@ public class ClientEvents
                 if(ability != null)
                 {
                     AbilityRenderer<?> abilityRenderer = ability.getRenderer();
-                    if(abilityRenderer.shouldRenderCustomHand(player, soulPlayer))
+                    if(abilityRenderer.shouldRenderCustomHand(player, event.getHand(), soulPlayer))
                     {
-                        abilityRenderer.renderHand(mc, player, soulPlayer, event.getPartialTicks(), event.getMatrixStack(), event.getBuffers(), event.getLight());
+                        abilityRenderer.renderHand(mc, player, soulPlayer, event);
                         event.setCanceled(true);
 
                     }
                 }
+                renderSoulnomiconFirstPerson(player, soulPlayer, mc, event);
+
             });
+
+
     }
 
+
+    private static int separationHUD = 0;
+
+    @SubscribeEvent
+    public static void renderSeparationHUD(RenderGameOverlayEvent.Pre event)
+    {
+        Minecraft mc = Minecraft.getInstance();
+        ClientPlayerEntity player = mc.player;
+        if(player == null)
+            return;
+        if(event.getType() == RenderGameOverlayEvent.ElementType.ALL)
+        {
+            player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(iSoulPlayer ->
+            {
+                AbilitiesManager abilitiesManager = iSoulPlayer.getAbilitiesManager();
+                if(abilitiesManager.getSeparation().isSeparated)
+                {
+                    float width = event.getWindow().getScaledWidth();
+                    float height = event.getWindow().getScaledHeight();
+                    float scale = 80.0F;
+
+                    if(separationHUD < 30)
+                        separationHUD++;
+
+                    float animation = separationHUD / 30F;
+
+                    MatrixStack matrixStack = new MatrixStack();
+                    RenderSystem.pushMatrix();
+                    matrixStack.push();
+                    matrixStack.translate(width / 2D, height, 0.0D);
+                    matrixStack.translate(-10F, -animation * 30F, 0F);
+                    matrixStack.rotate(Vector3f.YP.rotationDegrees(90F));
+                    matrixStack.scale(scale, scale, scale);
+                    renderSoulHealth(player, iSoulPlayer, animation, matrixStack);
+                    matrixStack.pop();
+                    RenderSystem.popMatrix();
+
+                }
+                else if(separationHUD > 0)
+                    separationHUD = 0;
+
+            });
+        }
+
+    }
 
     @SubscribeEvent
     public static void playerTickEvent(TickEvent.PlayerTickEvent event)
@@ -190,18 +237,19 @@ public class ClientEvents
         if(world == null)
             return;
 
-        // SeparationAbilityRenderer.renderWorldLast(mc, world, pl);
-
         //render soulnomicon near players
         for (AbstractClientPlayerEntity player : world.getPlayers())
         {
             player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(soulPlayer ->
             {
                 HandSide bookHand = soulPlayer.getAbilitiesManager().bookAbilityHand;
-                boolean isFirstPerson = player.equals(pl) && mc.gameSettings.thirdPersonView == 0;
-                float f = soulPlayer.getAbilitiesManager().bookFlyingAroundA.getAnimationF(event.getPartialTicks());
-                if(f > 0)
-                    renderSoulnomicon(player, soulPlayer, event.getPartialTicks(), isFirstPerson, f, bookHand, event.getMatrixStack());
+
+                LivingEntity entityIn = player;
+                if(soulPlayer.getAbilitiesManager().getSeparation().isSeparated)
+                    entityIn = SeparationAbility.getPlayerBodyBody(player);
+
+                if(entityIn != null && !(entityIn.equals(pl) && mc.gameSettings.thirdPersonView == 0))
+                    renderSoulnomiconThirdPerson(entityIn, soulPlayer, event.getPartialTicks(), bookHand, event.getMatrixStack());
 
             });
         }
@@ -219,29 +267,28 @@ public class ClientEvents
     }
 
 
-    private static void renderSoulnomicon(PlayerEntity player, ISoulPlayer soulPlayer, float partialTicks, boolean isFirstPerson, float f, HandSide hand, MatrixStack matrixStack)
+    private static void renderSoulnomiconThirdPerson(LivingEntity player, ISoulPlayer soulPlayer, float partialTicks, HandSide hand, MatrixStack matrixStack)
     {
+        float animationProgress = soulPlayer.getAbilitiesManager().bookFlyingAroundA.getAnimationF(partialTicks);
+        if(animationProgress == 0.0F)
+            return;
 
         Minecraft mc = Minecraft.getInstance();
         ActiveRenderInfo renderInfo = mc.gameRenderer.getActiveRenderInfo();
-        RenderSystem.enableBlend();
         double playerX = MathHelper.lerp(partialTicks, player.lastTickPosX, player.getPosX());
         double playerY = MathHelper.lerp(partialTicks, player.lastTickPosY, player.getPosY());
         double playerZ = MathHelper.lerp(partialTicks, player.lastTickPosZ, player.getPosZ());
 
-        float startYawPosition = isFirstPerson ? player.getYaw(partialTicks) : MathHelper.lerp(partialTicks, player.prevRenderYawOffset, player.renderYawOffset);
+        float startYawPosition = MathHelper.lerp(partialTicks, player.prevRenderYawOffset, player.renderYawOffset);
         float endYawPosition = player.getYaw(partialTicks);
-        float yawPosition = startYawPosition + (-startYawPosition + endYawPosition) * f;
-
+        float yawPosition = startYawPosition + (-startYawPosition + endYawPosition) * animationProgress;
 
         float startPitchPosition = 0F;
-        if(isFirstPerson)
-            startPitchPosition = player.getPitch(partialTicks);
 
 
         float endPitchPosition = player.getPitch(partialTicks);
 
-        float pitchPosition = startPitchPosition + (-startPitchPosition + endPitchPosition) * f;
+        float pitchPosition = startPitchPosition + (-startPitchPosition + endPitchPosition) * animationProgress;
 
 
         double y = playerY + player.getEyeHeight();
@@ -255,28 +302,23 @@ public class ClientEvents
         float startOffsetZ = 0.35F;
         float endOffsetZ = -1.5F;
 
-        if(isFirstPerson)
-        {
-            startOffsetY = -0.4F;
-            startOffsetX = 1F;
-            startOffsetZ = 0.8F;
-        }
         if(hand == HandSide.LEFT)
         {
-            startOffsetZ = -(isFirstPerson ? 0.7F : 0.4F);
+            startOffsetZ = -0.4F;
             endOffsetZ = +1.5F;
         }
-        float offsetX = startOffsetX + (-startOffsetX + endOffsetX) * f;
-        float offsetY = startOffsetY + (-startOffsetY + endOffsetY) * f;
-        float offsetZ = startOffsetZ + (-startOffsetZ + endOffsetZ) * f;
+        float offsetX = startOffsetX + (-startOffsetX + endOffsetX) * animationProgress;
+        float offsetY = startOffsetY + (-startOffsetY + endOffsetY) * animationProgress;
+        float offsetZ = startOffsetZ + (-startOffsetZ + endOffsetZ) * animationProgress;
 
-        offsetY += MathHelper.sin((partialTicks + player.ticksExisted) * 0.1F) * 0.1F * f;
+        offsetY += MathHelper.sin((partialTicks + player.ticksExisted) * 0.1F) * 0.1F * animationProgress;
 
         double bookX = playerX - renderInfo.getProjectedView().x;
         double bookY = y - renderInfo.getProjectedView().y;
         double bookZ = playerZ - renderInfo.getProjectedView().z;
 
         matrixStack.push();
+
         matrixStack.translate(bookX, bookY, bookZ);
         matrixStack.rotate(Vector3f.YP.rotationDegrees(-yawPosition - 90F));
         matrixStack.rotate(Vector3f.ZP.rotationDegrees(-pitchPosition));
@@ -288,29 +330,19 @@ public class ClientEvents
         float startRotationPitch = 90F;
         float endRotationPitch = 80F;
 
-        if(isFirstPerson)
-        {
-            startRotationYaw = hand == HandSide.RIGHT ? -200F : -160F;
-            startRotationPitch = 25F;
-        }
         if(hand == HandSide.LEFT)
             endRotationYaw -= 50F;
 
 
-        float rotationYaw = startRotationYaw + (-startRotationYaw + endRotationYaw) * f;
-        float rotationPitch = startRotationPitch + (-startRotationPitch + endRotationPitch) * f;
+        float rotationYaw = startRotationYaw + (-startRotationYaw + endRotationYaw) * animationProgress;
+        float rotationPitch = startRotationPitch + (-startRotationPitch + endRotationPitch) * animationProgress;
 
         matrixStack.rotate(Vector3f.YP.rotationDegrees(rotationYaw));
-        matrixStack.rotate(Vector3f.ZP.rotationDegrees(rotationPitch - 100F * f));
+        matrixStack.rotate(Vector3f.ZP.rotationDegrees(rotationPitch - 100F * animationProgress));
         if(hand == HandSide.RIGHT)
-            matrixStack.rotate(Vector3f.XP.rotationDegrees(7F * f));
+            matrixStack.rotate(Vector3f.XP.rotationDegrees(7F * animationProgress));
         else
-            matrixStack.rotate(Vector3f.XP.rotationDegrees(-7F * f));
-        if(isFirstPerson)
-        {
-            float scale = 0.7F + 0.3F * f;
-            matrixStack.scale(scale, scale, scale);
-        }
+            matrixStack.rotate(Vector3f.XP.rotationDegrees(-7F * animationProgress));
 
         if(player instanceof ClientPlayerEntity)
         {
@@ -323,29 +355,78 @@ public class ClientEvents
 
         int light = mc.getRenderManager().getPackedLight(player, partialTicks);
 
+
         mc.gameRenderer.getLightTexture().enableLightmap();
-        RenderHelper.enableStandardItemLighting();
         IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.getImpl(Tessellator.getInstance().getBuffer());
-        SoulnomiconRenderer.renderSoulnomicon(player, false, SoulnomiconItem.isDeathNote(soulPlayer.getAbilitiesManager().soulnomiconStack),matrixStack,renderTypeBuffer,light, OverlayTexture.NO_OVERLAY);
+        SoulnomiconRenderer.renderSoulnomicon(soulPlayer, false, SoulnomiconItem.isDeathNote(soulPlayer.getAbilitiesManager().soulnomiconStack), matrixStack, renderTypeBuffer, light, OverlayTexture.NO_OVERLAY);
         renderTypeBuffer.finish();
-        RenderHelper.disableStandardItemLighting();
+
         mc.gameRenderer.getLightTexture().disableLightmap();
-        if(f >= 1.0F)
-        {
-            float hudF = soulPlayer.getAbilitiesManager().bookFlyingAroundA.getHudAnimationF(partialTicks);
-            float openF = soulPlayer.getAbilitiesManager().bookOpeningA.getAnimationF(partialTicks);
-            renderSoulHealth(player, soulPlayer, hudF * openF,matrixStack);
-        }
-
-        ISoulAbility<?> ability = soulPlayer.getAbilitiesManager().getSelectedAbility();
-        if(ability != null)
-            ability.getRenderer().renderBookHUD(player, soulPlayer);
-
-
         matrixStack.pop();
 
+    }
 
-        RenderSystem.disableBlend();
+    private static void renderSoulnomiconFirstPerson(PlayerEntity player, ISoulPlayer soulPlayer, Minecraft mc, RenderHandEvent event)
+    {
+        MatrixStack matrixStack = event.getMatrixStack();
+        float partialTicks = event.getPartialTicks();
+
+        AbilitiesManager abilitiesManager = soulPlayer.getAbilitiesManager();
+        float animationProgress = abilitiesManager.bookFlyingAroundA.getAnimationF(partialTicks, 0, 8);
+        ItemStack soulnomiconStack = abilitiesManager.soulnomiconStack;
+
+
+        boolean flag = event.getHand() == Hand.MAIN_HAND;
+        HandSide handside = flag ? player.getPrimaryHand() : player.getPrimaryHand().opposite();
+        if(animationProgress == 0.0F || soulnomiconStack.isEmpty() || handside != abilitiesManager.bookAbilityHand)
+            return;
+
+        matrixStack.push();
+
+        int i = handside == HandSide.RIGHT ? -1 : 1;
+        if(mc.gameSettings.viewBobbing)
+            cancelBobbing(player, matrixStack, partialTicks);
+
+        matrixStack.translate((float) -i * 0.56F, -0.52F, -0.72F);
+        matrixStack.translate(1.5F * animationProgress * i, 0.85F * animationProgress, -0.7F * animationProgress);
+        matrixStack.translate(0F, MathHelper.sin((partialTicks + player.ticksExisted) * 0.1F) * 0.05F * animationProgress, 0);
+
+        matrixStack.rotate(Vector3f.XN.rotationDegrees(-45F * animationProgress));
+        matrixStack.rotate(Vector3f.YN.rotationDegrees(35F * animationProgress * i));
+        matrixStack.rotate(Vector3f.ZN.rotationDegrees(-10F * animationProgress * i));
+        mc.getFirstPersonRenderer().renderItemSide(player, soulnomiconStack, handside == HandSide.RIGHT ? ItemCameraTransforms.TransformType.FIRST_PERSON_RIGHT_HAND : ItemCameraTransforms.TransformType.FIRST_PERSON_LEFT_HAND, handside == HandSide.LEFT, matrixStack, event.getBuffers(), event.getLight());
+        float f = abilitiesManager.bookFlyingAroundA.getAnimationF(partialTicks, 3, 8) * abilitiesManager.bookOpeningA.getAnimationF(partialTicks);
+
+        if(f > 0F)
+        {
+            matrixStack.push();
+            matrixStack.scale(f, f, f);
+
+            matrixStack.translate((1F - f) * 0.3F * i, 0.2F + (1F - f) * 1.1F, -(1F - f) * 1.3F);
+            matrixStack.rotate(Vector3f.ZP.rotationDegrees(-180F * i));
+            matrixStack.rotate(Vector3f.YP.rotationDegrees(-100F * i));
+            matrixStack.rotate(Vector3f.XP.rotationDegrees(10F));
+            matrixStack.translate(0F, 0F, -0.09F);
+            renderSoulHealth(player, soulPlayer, f, matrixStack);
+            ISoulAbility<?> ability = soulPlayer.getAbilitiesManager().getSelectedAbility();
+            if(ability != null)
+                ability.getRenderer().renderBookHUD(player, soulPlayer);
+
+            matrixStack.pop();
+        }
+        matrixStack.pop();
+
+    }
+
+
+    private static void cancelBobbing(PlayerEntity player, MatrixStack matrixStack, float partialTicks)
+    {
+        float f = player.distanceWalkedModified - player.prevDistanceWalkedModified;
+        float f1 = -(player.distanceWalkedModified + f * partialTicks);
+        float f2 = MathHelper.lerp(partialTicks, player.prevCameraYaw, player.cameraYaw);
+        matrixStack.translate(-MathHelper.sin(f1 * (float) Math.PI) * f2 * 0.5F, Math.abs(MathHelper.cos(f1 * (float) Math.PI) * f2), 0.0D);
+        matrixStack.rotate(Vector3f.ZP.rotationDegrees(-MathHelper.sin(f1 * (float) Math.PI) * f2 * 3.0F));
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(-Math.abs(MathHelper.cos(f1 * (float) Math.PI - 0.2F) * f2) * 5.0F));
 
     }
 
@@ -369,7 +450,7 @@ public class ClientEvents
     }
 
 
-    private static void renderSoulHealth(PlayerEntity player, ISoulPlayer soulPlayer, float f,MatrixStack matrixStack)
+    private static void renderSoulHealth(PlayerEntity player, ISoulPlayer soulPlayer, float f, MatrixStack matrixStack)
     {
 
         matrixStack.push();
@@ -392,13 +473,12 @@ public class ClientEvents
         int tx = ticks % 5;
 
         float alpha = ((MathHelper.sin(ticks * 0.3F) + 1F) * 0.5F) * 0.3F;
-        matrixStack.translate(0.05F + 0.20F * f, 0.1F * (1F - f), 0.15F);
+        // matrixStack.translate(0.05F + 0.20F * f, 0.1F * (1F - f), 0.15F);
         matrixStack.rotate(Vector3f.YP.rotationDegrees(-90F));
-        matrixStack.scale(-0.03F * f, -0.03F * f, 0.03F * f);
-
+        matrixStack.scale(0.03F, 0.03F, 0.03F);
         mc.getTextureManager().bindTexture(ICONS);
         RenderSystem.color4f(0.9F, 0.9F, 0.9F, 0.3F + alpha);
-        renderSoulHeart(matrixStack,10F, tx * 9);
+        renderSoulHeart(matrixStack, 10F, tx * 9);
 
         if(!player.isCreative())
         {
@@ -406,17 +486,15 @@ public class ClientEvents
             float abilityUseHealth = (useSoulAmount >= 0 ? Math.min(health + useSoulAmount, maxHealth) : health) / maxHealth;
 
             if(useSoulAmount >= 0)
-                RenderSystem.color4f(0.2F, 1F, 0.2F, 0.3F);
+                RenderSystem.color4f(0.2F, 1F, 0.2F, 0.3F * f);
             else
-                RenderSystem.color4f(1F, 0.2F, 0.2F, 0.3F);
+                RenderSystem.color4f(1F, 0.2F, 0.2F, 0.3F * f);
 
-            RenderSystem.translatef(0F, 0F, -0.01F);
-            renderSoulHeart(matrixStack,10F * abilityUseHealth, tx * 9);
+            renderSoulHeart(matrixStack, 10F * abilityUseHealth, tx * 9);
         }
 
-        RenderSystem.color4f(1F, 1F, 1F, 1F);
-        matrixStack.translate(0F, 0F, -0.01F);
-        renderSoulHeart(matrixStack,10F * currentHealth, tx * 9);
+        RenderSystem.color4f(1F, 1F, 1F, 1F * f);
+        renderSoulHeart(matrixStack, 10F * currentHealth, tx * 9);
 
         RenderSystem.disableBlend();
         matrixStack.pop();
@@ -424,7 +502,7 @@ public class ClientEvents
 
     }
 
-    private static void renderSoulHeart(MatrixStack matrixStack,float height, int texOffset)
+    private static void renderSoulHeart(MatrixStack matrixStack, float height, int texOffset)
     {
 
         float vMin = (10F - height) / 256F;
@@ -438,10 +516,10 @@ public class ClientEvents
 
         BufferBuilder bufferbuilder = Tessellator.getInstance().getBuffer();
         bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-        bufferbuilder.pos(matrix4f,0, height + y, 0).tex(uMin, vMax).endVertex();
-        bufferbuilder.pos(matrix4f,9, height + y, 0).tex(uMax, vMax).endVertex();
-        bufferbuilder.pos(matrix4f,9, 0 + y, 0).tex(uMax, vMin).endVertex();
-        bufferbuilder.pos(matrix4f,0, 0 + y, 0).tex(uMin, vMin).endVertex();
+        bufferbuilder.pos(matrix4f, 0, height + y, 0).tex(uMin, vMax).endVertex();
+        bufferbuilder.pos(matrix4f, 9, height + y, 0).tex(uMax, vMax).endVertex();
+        bufferbuilder.pos(matrix4f, 9, 0 + y, 0).tex(uMax, vMin).endVertex();
+        bufferbuilder.pos(matrix4f, 0, 0 + y, 0).tex(uMin, vMin).endVertex();
         bufferbuilder.finishDrawing();
         RenderSystem.enableAlphaTest();
         WorldVertexBufferUploader.draw(bufferbuilder);

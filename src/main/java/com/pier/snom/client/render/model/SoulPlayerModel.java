@@ -59,7 +59,6 @@ public class SoulPlayerModel extends AnimatedPlayerModel
     }
 
 
-
     @Override
     public void render(MatrixStack matrixStackIn, IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha)
     {
@@ -75,7 +74,7 @@ public class SoulPlayerModel extends AnimatedPlayerModel
     @Nonnull
     protected Iterable<ModelRenderer> getBodyParts()
     {
-        return  ImmutableList.of(this.bipedBody, this.bipedRightArm,this.bipedRightArmwear,this.bipedLeftArmwear, this.bipedLeftArm, this.bipedHeadwear,this.Tail1R, this.tail1L);
+        return ImmutableList.of(this.bipedBody, this.bipedRightArm, this.bipedRightArmwear, this.bipedLeftArmwear, this.bipedLeftArm, this.bipedHeadwear, this.Tail1R, this.tail1L);
     }
 
     @Override
@@ -146,6 +145,7 @@ public class SoulPlayerModel extends AnimatedPlayerModel
             }
         });
     }
+
 
 
 }

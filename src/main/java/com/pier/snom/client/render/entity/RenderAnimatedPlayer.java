@@ -48,7 +48,7 @@ public class RenderAnimatedPlayer extends PlayerRenderer
         return new AnimatedPlayerModel(entity, isHand);
     }
 
-    public void renderArm(AbstractClientPlayerEntity clientPlayer, ISoulPlayer soulPlayer, ISoulAbility<?> ability, float partialTicks,MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn)
+    public void renderArm(AbstractClientPlayerEntity clientPlayer, ISoulPlayer soulPlayer, ISoulAbility<?> ability, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn)
     {
         /*
         AnimatedPlayerModel model = getPlayerModel(clientPlayer, true);

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.pier.snom.capability.ISoulPlayer;
 import com.pier.snom.capability.abilities.ClairvoyanceAbility;
+import com.pier.snom.client.ModRenderTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.*;
 import net.minecraft.entity.item.ItemEntity;
@@ -17,6 +18,8 @@ import net.minecraft.world.World;
 
 public class ClairvoyanceAbilityRenderer extends AbilityRenderer<ClairvoyanceAbility>
 {
+
+
     public ClairvoyanceAbilityRenderer(ClairvoyanceAbility ability)
     {
         super(ability);
@@ -88,16 +91,14 @@ public class ClairvoyanceAbilityRenderer extends AbilityRenderer<ClairvoyanceAbi
         double offset = (1D - scale) / 2D;
         final AxisAlignedBB box = new AxisAlignedBB(0, 0, 0, scale, scale, scale);
         matrix.push();
-        matrix.translate(highlightX + offset, highlightY + offset, highlightZ + offset);
-        RenderHelper.disableStandardItemLighting();
-        RenderSystem.disableTexture();
+
         RenderSystem.disableDepthTest();
+        matrix.translate(highlightX + offset, highlightY + offset, highlightZ + offset);
         IRenderTypeBuffer.Impl bufferSource = Minecraft.getInstance().getRenderTypeBuffers().getBufferSource();
-        WorldRenderer.drawBoundingBox(matrix, bufferSource.getBuffer(RenderType.LINES), box, 1F, 1F, 1F, 1F);
+        WorldRenderer.drawBoundingBox(matrix, bufferSource.getBuffer(ModRenderTypes.HIGHLIGHT_LINES), box, 1F, 1F, 1F, 1F);
         bufferSource.finish();
+
         RenderSystem.enableDepthTest();
-        RenderSystem.enableTexture();
-        RenderHelper.enableStandardItemLighting();
         matrix.pop();
 
     }

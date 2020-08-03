@@ -21,7 +21,7 @@ public class PlayerData
 {
 
 
-    private final CompoundNBT playerTag;
+    public final CompoundNBT playerTag;
 
 
     public PlayerData(CompoundNBT playerTag)
@@ -56,6 +56,8 @@ public class PlayerData
     }
 
     public boolean isInvulnerable() { return playerTag.getBoolean("Invulnerable");}
+
+
 
     /**
      * this method transfers the player data to the body

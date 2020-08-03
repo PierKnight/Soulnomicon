@@ -43,17 +43,23 @@ public class PlayerBodyEntity extends MobEntity
     public float prevCameraYaw;
     public float cameraYaw;
 
+    private float bodYaw = 0F;
+    private float headYaw = 0F;
+    private float headPitch = 0F;
+
 
     public PlayerBodyEntity(EntityType<? extends MobEntity> type, World worldIn)
     {
         super(type, worldIn);
     }
 
-    public PlayerBodyEntity(World worldIn)
+    public PlayerBodyEntity(World worldIn, float bodYaw, float headYaw, float headPitch)
     {
         super(EntityRegistry.PLAYER_BODY_ENTITY, worldIn);
+        this.bodYaw = rotationYaw;
+        this.headYaw = headYaw;
+        this.headPitch = headPitch;
     }
-
 
 
     protected void registerAttributes()
@@ -81,6 +87,11 @@ public class PlayerBodyEntity extends MobEntity
         return data != null ? (data.isCreative() || data.isInvulnerable()) && !source.canHarmInCreative() : super.isInvulnerableTo(source);
     }
 
+    @Override
+    protected void setRotation(float yaw, float pitch)
+    {
+    }
+
     public void setPlayerSoul(PlayerEntity player)
     {
         CompoundNBT nbt = new CompoundNBT();
@@ -93,13 +104,12 @@ public class PlayerBodyEntity extends MobEntity
 
         for (EquipmentSlotType slotType : EquipmentSlotType.values())
             this.setItemStackToSlot(slotType, player.getItemStackFromSlot(slotType));
-        this.setPositionAndUpdate(player.getPosX(), player.getPosY(), player.getPosZ());
+        this.setPositionAndRotation(player.getPosX(), player.getPosY(), player.getPosZ(), player.rotationYaw, player.rotationPitch);
 
-        this.rotationPitch = player.rotationPitch;
-        this.prevRotationPitch = player.prevRotationPitch;
-
-        this.rotationYaw = player.getYaw(this.ticksExisted);
-        this.rotationYawHead = player.getYaw(this.ticksExisted);
+        nbt.putFloat("bodyYaw", player.rotationYaw);
+        nbt.putFloat("headPitch", player.rotationPitch);
+        nbt.putFloat("headYaw", player.rotationYawHead);
+        nbt.putFloat("renderYawOffset", player.renderYawOffset);
 
         this.setSneaking(player.isSneaking() && !player.abilities.isFlying);
         this.setLeftHanded(player.getPrimaryHand() == HandSide.LEFT);
@@ -225,8 +235,24 @@ public class PlayerBodyEntity extends MobEntity
         this.updateCape();
 
         PlayerData playerData = getPlayerData();
-        if(playerData != null && playerData.isFlying())
-            this.setMotion(this.getMotion().mul(1D, 0, 1D));
+        if(playerData != null)
+        {
+            if(playerData.isFlying())
+                this.setMotion(this.getMotion().mul(1D, 0, 1D));
+            float headPitch = playerData.playerTag.getFloat("headPitch");
+            float headYaw = playerData.playerTag.getFloat("headYaw");
+            float bodyYaw = playerData.playerTag.getFloat("bodyYaw");
+            float renderYawOffset = playerData.playerTag.getFloat("renderYawOffset");
+            this.rotationPitch = headPitch;
+            this.prevRotationPitch = rotationPitch;
+            this.rotationYaw = bodyYaw;
+            this.prevRotationYaw = bodyYaw;
+            this.rotationYawHead = headYaw;
+            this.prevRotationYawHead = headYaw;
+            this.renderYawOffset = renderYawOffset;
+            this.prevRenderYawOffset = this.renderYawOffset;
+
+        }
 
     }
 
@@ -234,9 +260,12 @@ public class PlayerBodyEntity extends MobEntity
     {
         this.prevCameraYaw = this.cameraYaw;
         float f;
-        if (this.onGround && !(this.getHealth() <= 0.0F) && !this.isSwimming()) {
+        if(this.onGround && !(this.getHealth() <= 0.0F) && !this.isSwimming())
+        {
             f = Math.min(0.1F, MathHelper.sqrt(horizontalMag(this.getMotion())));
-        } else {
+        }
+        else
+        {
             f = 0.0F;
         }
         this.cameraYaw += (f - this.cameraYaw) * 0.4F;
@@ -248,32 +277,38 @@ public class PlayerBodyEntity extends MobEntity
         double d1 = this.getPosY() - this.chasingPosY;
         double d2 = this.getPosZ() - this.chasingPosZ;
         double d3 = 10.0D;
-        if (d0 > 10.0D) {
+        if(d0 > 10.0D)
+        {
             this.chasingPosX = this.getPosX();
             this.prevChasingPosX = this.chasingPosX;
         }
 
-        if (d2 > 10.0D) {
+        if(d2 > 10.0D)
+        {
             this.chasingPosZ = this.getPosZ();
             this.prevChasingPosZ = this.chasingPosZ;
         }
 
-        if (d1 > 10.0D) {
+        if(d1 > 10.0D)
+        {
             this.chasingPosY = this.getPosY();
             this.prevChasingPosY = this.chasingPosY;
         }
 
-        if (d0 < -10.0D) {
+        if(d0 < -10.0D)
+        {
             this.chasingPosX = this.getPosX();
             this.prevChasingPosX = this.chasingPosX;
         }
 
-        if (d2 < -10.0D) {
+        if(d2 < -10.0D)
+        {
             this.chasingPosZ = this.getPosZ();
             this.prevChasingPosZ = this.chasingPosZ;
         }
 
-        if (d1 < -10.0D) {
+        if(d1 < -10.0D)
+        {
             this.chasingPosY = this.getPosY();
             this.prevChasingPosY = this.chasingPosY;
         }
@@ -289,7 +324,8 @@ public class PlayerBodyEntity extends MobEntity
     public void updateRidden()
     {
         super.updateRidden();
-        if (this.world.isRemote && !this.isCrouching() && !this.isPassenger()) {
+        if(this.world.isRemote && !this.isCrouching() && !this.isPassenger())
+        {
 
             this.prevCameraYaw = this.cameraYaw;
             this.cameraYaw = 0.0F;

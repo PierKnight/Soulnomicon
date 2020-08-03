@@ -2,6 +2,7 @@ package com.pier.snom.capability;
 
 import com.pier.snom.capability.abilities.AbilitiesManager;
 import com.pier.snom.capability.abilities.EnumAbility;
+import com.pier.snom.capability.abilities.ISoulAbility;
 import com.pier.snom.init.ModDamageSource;
 import com.pier.snom.network.PacketManager;
 import com.pier.snom.network.client.PacketUpdateCapability;
@@ -105,7 +106,9 @@ public class SoulPlayer implements ISoulPlayer
     public void update(PlayerEntity player)
     {
         //recover soul health every 5 seconds
-        if(this.health > 0.0F && !abilitiesManager.getSeparation().isSeparated && player.world.getGameTime() % 20 == 0)
+        ISoulAbility<?> ability = this.getAbilitiesManager().getSelectedAbility();
+
+        if(this.health > 0.0F && player.world.getGameTime() % 20 == 0 && (ability == null || ability.shouldRegenPlayer(player,this)))
             recoverSoul(player, 0.2F);
 
         abilitiesManager.update(player, this);

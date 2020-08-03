@@ -3,7 +3,7 @@ package com.pier.snom;
 import com.pier.snom.capability.ISoulPlayer;
 import com.pier.snom.capability.SoulPlayer;
 import com.pier.snom.capability.SoulPlayerStorage;
-import com.pier.snom.client.ClientEvents;
+import com.pier.snom.capability.render.SeparationAbilityRenderer;
 import com.pier.snom.client.KeyBoardHandler;
 import com.pier.snom.client.render.ModRenderingRegistry;
 import com.pier.snom.network.PacketManager;
@@ -21,7 +21,6 @@ import org.apache.logging.log4j.Logger;
 public class SoulnomiconMain
 {
     public static final String ID = "snom";
-
     private static final Logger LOGGER = LogManager.getLogger(ID);
 
     public SoulnomiconMain()
@@ -47,11 +46,10 @@ public class SoulnomiconMain
     @SuppressWarnings("UnusedParameters")
     private void doClientStuff(final FMLClientSetupEvent event)
     {
-        ClientEvents.initRendering();
-
         ModRenderingRegistry.registerRender();
-
         KeyBoardHandler.registerKeyBinding();
+
+        SeparationAbilityRenderer.initReflection();
 
 
     }

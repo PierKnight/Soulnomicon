@@ -44,7 +44,7 @@ public class PacketStartSearch
                 ServerPlayerEntity player = ctx.get().getSender();
                 if(player != null)
                 {
-                    player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(soulPlayer -> soulPlayer.getAbilitiesManager().getClairvoyanceAbility().startSearch(pkt.stackToSearch, pkt.ignoreNBT));
+                    player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(soulPlayer -> soulPlayer.getAbilitiesManager().getClairvoyanceAbility().startSearch(player,soulPlayer,pkt.stackToSearch, pkt.ignoreNBT));
                     player.swingArm(Hand.MAIN_HAND);
                 }
             });
