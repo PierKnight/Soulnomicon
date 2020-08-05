@@ -21,6 +21,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -276,6 +278,7 @@ public class SeparationAbility implements ISoulAbility<SeparationAbilityRenderer
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public SeparationAbilityRenderer getRenderer()
     {
         return new SeparationAbilityRenderer(this);

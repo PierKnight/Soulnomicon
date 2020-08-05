@@ -6,6 +6,7 @@ import com.pier.snom.capability.animation.ClairvoyanceScan;
 import com.pier.snom.capability.render.ClairvoyanceAbilityRenderer;
 import com.pier.snom.client.gui.ClairvoyanceScreen;
 import com.pier.snom.network.PacketManager;
+import com.pier.snom.network.PacketUtils;
 import com.pier.snom.network.client.PacketUpdateClairvoyance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -20,6 +21,8 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -156,9 +159,7 @@ public class ClairvoyanceAbility implements ISoulAbility<ClairvoyanceAbilityRend
     public boolean cast(ISoulPlayer soulPlayer, PlayerEntity player)
     {
         if(player.world.isRemote)
-        {
-            Minecraft.getInstance().displayGuiScreen(new ClairvoyanceScreen(player, player.isCreative() ? getAllItems() : this.knownItems));
-        }
+            PacketUtils.displayClairvoyanceAbility(player,player.isCreative() ? getAllItems() : this.knownItems);
         return false;
     }
 
@@ -226,6 +227,7 @@ public class ClairvoyanceAbility implements ISoulAbility<ClairvoyanceAbilityRend
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public ClairvoyanceAbilityRenderer getRenderer()
     {
         return new ClairvoyanceAbilityRenderer(this);

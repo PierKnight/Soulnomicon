@@ -1,20 +1,22 @@
 package com.pier.snom.client;
 
 import com.pier.snom.capability.SoulPlayerProvider;
+import com.pier.snom.capability.abilities.ControlAbility;
 import com.pier.snom.init.ModSounds;
 import net.minecraft.client.audio.TickableSound;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.Vec3d;
 
-public class TestSound extends TickableSound
+public class ControlLoopSound extends TickableSound
 {
     private int ticks = 0;
 
     private final PlayerEntity player;
     private final Entity entity;
 
-    public TestSound(PlayerEntity player, Entity entity)
+    public ControlLoopSound(PlayerEntity player, Entity entity)
     {
         super(ModSounds.CONTROLLING, SoundCategory.AMBIENT);
         this.repeat = true;
@@ -37,7 +39,12 @@ public class TestSound extends TickableSound
 
         this.player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(soulPlayer ->
         {
-            if(soulPlayer.getAbilitiesManager().getControl().isControllingEntity())
+            double speed = Math.min(entity.getPositionVec().distanceTo(new Vec3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ)),4D);
+
+            this.pitch = 1F + ((float)speed / 4F) * 0.2F;
+
+            ControlAbility controlAbility = soulPlayer.getAbilitiesManager().getControl();
+            if(controlAbility.isControllingEntity())
             {
                 if(this.ticks < 10)
                     this.ticks++;

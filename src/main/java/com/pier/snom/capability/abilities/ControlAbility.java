@@ -7,7 +7,7 @@ import com.pier.snom.client.particle.SoulPlayerParticleData;
 import com.pier.snom.init.ModDamageSource;
 import com.pier.snom.init.ModSounds;
 import com.pier.snom.network.PacketManager;
-import com.pier.snom.network.client.PacketPlayControlSound;
+import com.pier.snom.network.client.PacketPlaySmashParticle;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,6 +19,8 @@ import net.minecraft.network.play.server.SEntityVelocityPacket;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 import java.util.Random;
@@ -43,7 +45,7 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
     @Override
     public boolean canUse(PlayerEntity player, ISoulPlayer soulPlayer)
     {
-        return player.getHeldItemMainhand().isEmpty();
+        return isControllingEntity() || player.getHeldItemMainhand().isEmpty();
     }
 
 
@@ -95,21 +97,18 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
                     ((ServerPlayerEntity) entity).connection.sendPacket(new SEntityVelocityPacket(entity));
 
 
-                if(entity.collided && !this.lastCollide)
+                if(entity.collided && !this.lastCollide && speed >= 0.8D)
                 {
-                    if(speed >= 0.8D)
-                    {
-                        float volume = (float) speed * 2F;
-                        float pitch = 0.9F + (float) Math.random() * 0.2F;
+                    float volume = (float) speed * 2F;
+                    float pitch = 0.9F + (float) Math.random() * 0.2F;
 
-                        world.playSound(null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), ModSounds.CONTROL_SMASH, SoundCategory.AMBIENT, volume, pitch);
+                    world.playSound(null, entity.getPosX(), entity.getPosY(), entity.getPosZ(), ModSounds.CONTROL_SMASH, SoundCategory.AMBIENT, volume, pitch);
+                    PacketManager.channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity),new PacketPlaySmashParticle(entity.getEntityId()));
 
-                        entity.attackEntityFrom(ModDamageSource.causeSmashDamage(player), (float) speed * 4F);
+                    entity.attackEntityFrom(ModDamageSource.causeSmashDamage(player), (float) speed * 4F);
 
-                        if(!entity.isAlive())
-                            entity.setMotion(0D, 0D, 0D);
-
-                    }
+                    if(!entity.isAlive())
+                        entity.setMotion(0D, 0D, 0D);
                 }
                 entity.fallDistance = 0F;
 
@@ -141,7 +140,6 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
                         world.addParticle(soulFlame, true, particleX, particleY, particleZ, particleMotion.x, particleMotion.y, particleMotion.z);
                 }
             }
-
             this.lastCollide = entity.collided;
 
         }
@@ -168,6 +166,7 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
         }
 
     }
+
 
     public boolean isControllingEntity()
     {
@@ -244,7 +243,8 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
 
             soulPlayer.consumeSoul(player, 2F);
 
-            PacketManager.channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new PacketPlayControlSound(this.selectedEntityID));
+
+          //  PacketManager.channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new PacketPlayControlSound(this.selectedEntityID));
 
             return true;
         }
@@ -312,6 +312,7 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public ControlAbilityRenderer getRenderer()
     {
         return new ControlAbilityRenderer(this);

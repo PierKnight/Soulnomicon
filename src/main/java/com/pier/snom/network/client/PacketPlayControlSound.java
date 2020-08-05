@@ -1,6 +1,6 @@
 package com.pier.snom.network.client;
 
-import com.pier.snom.client.TestSound;
+
 import com.pier.snom.network.PacketUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -39,7 +39,7 @@ public class PacketPlayControlSound
                 PlayerEntity player = PacketUtils.getClientPlayer();
                 Entity entity = player.world.getEntityByID(pkt.entityID);
                 if(entity != null)
-                    PacketUtils.getSoundHandler().play(new TestSound(player, entity));
+                    PacketUtils.playControlSound(player,entity);
 
 
             });
