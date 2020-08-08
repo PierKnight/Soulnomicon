@@ -29,10 +29,10 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
 {
 
 
-    public static double MAX_REACH_DISTANCE = 10D;
+    public static double MAX_REACH_DISTANCE = 8D;
 
     public int selectedEntityID = 0;
-    public double distance = 7D;
+    public double distance = 8D;
     private boolean lastCollide = false;
 
 
