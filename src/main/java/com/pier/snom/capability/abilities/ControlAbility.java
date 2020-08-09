@@ -7,6 +7,7 @@ import com.pier.snom.client.particle.SoulPlayerParticleData;
 import com.pier.snom.init.ModDamageSource;
 import com.pier.snom.init.ModSounds;
 import com.pier.snom.network.PacketManager;
+import com.pier.snom.network.client.PacketPlayControlSound;
 import com.pier.snom.network.client.PacketPlaySmashParticle;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.Pose;
@@ -243,8 +244,7 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
 
             soulPlayer.consumeSoul(player, 2F);
 
-
-          //  PacketManager.channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new PacketPlayControlSound(this.selectedEntityID));
+            PacketManager.channel.send(PacketDistributor.TRACKING_ENTITY.with(() -> entity), new PacketPlayControlSound(this.selectedEntityID));
 
             return true;
         }
