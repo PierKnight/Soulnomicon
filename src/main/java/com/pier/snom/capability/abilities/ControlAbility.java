@@ -17,6 +17,7 @@ import net.minecraft.entity.projectile.DamagingProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SEntityVelocityPacket;
+import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.*;
 import net.minecraft.world.World;
@@ -226,6 +227,7 @@ public class ControlAbility implements ISoulAbility<ControlAbilityRenderer>
                         entity.velocityChanged = true;
 
                     }
+                    player.swingArm(Hand.MAIN_HAND);
                 }
             }
             this.selectedEntityID = 0;

@@ -24,6 +24,7 @@ public class AbilitiesManager
     private final SeparationAbility separationAbility = new SeparationAbility();
     private final ControlAbility controlAbility = new ControlAbility();
     private final ClairvoyanceAbility clairvoyanceAbility = new ClairvoyanceAbility();
+    private final BeamAbility beamAbility = new BeamAbility();
 
 
     public final BookOpenAnimation bookOpeningA = new BookOpenAnimation();
@@ -58,6 +59,8 @@ public class AbilitiesManager
                 return controlAbility;
             case CLAIRVOYANCE:
                 return clairvoyanceAbility;
+            case BEAM:
+                return beamAbility;
             default:
                 return null;
         }
@@ -94,6 +97,11 @@ public class AbilitiesManager
     public ClairvoyanceAbility getClairvoyanceAbility()
     {
         return clairvoyanceAbility;
+    }
+
+    public BeamAbility getBeamAbility()
+    {
+        return beamAbility;
     }
 
     public void writeToNBT(CompoundNBT nbt)

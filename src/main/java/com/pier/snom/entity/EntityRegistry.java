@@ -12,12 +12,14 @@ import net.minecraftforge.registries.IForgeRegistry;
 public class EntityRegistry
 {
     public static EntityType<PlayerBodyEntity> PLAYER_BODY_ENTITY = createEntityType("player_body", PlayerBodyEntity::new, EntityClassification.MISC, 0.6F, 1.8F);
+    public static EntityType<SoulMasterEntity> SOUL_MASTER_ENTITY = createEntityType("soul_master", SoulMasterEntity::new, EntityClassification.MONSTER, 1.2F, 4F);
 
 
 
     public static void registerEntities(IForgeRegistry<EntityType<?>> registry)
     {
         registry.register(PLAYER_BODY_ENTITY);
+        registry.register(SOUL_MASTER_ENTITY);
     }
 
     public static void registerEntityEggs(IForgeRegistry<Item> registryEvent)

@@ -2,7 +2,7 @@ package com.pier.snom.entity;
 
 import com.pier.snom.capability.PlayerData;
 import com.pier.snom.init.ModDamageSource;
-import com.pier.snom.world.SavedBodyPlayers;
+import com.pier.snom.world.save.SavedBodyPlayers;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SharedMonsterAttributes;

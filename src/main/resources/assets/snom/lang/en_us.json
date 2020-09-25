@@ -1,15 +1,35 @@
 {
   "item.snom.soulnomicon": "Soulnomicon",
+
   "death.attack.consumedSoul": "%1$s ran out of soul",
   "death.attack.smash": "%1$s got smashed really hard by %2$s",
+  "death.soul_master0": "You can try next time %s",
+  "death.soul_master1": "%s died for failing the dungeon challenge!",
+
   "key.categories.snom": "Soulnomicon",
   "key.soul.activation": "Ability Cast Key",
+
   "clairvoyance.click.item": "§eClick To start searching this item",
   "clairvoyance.filter": "§eIgnore NBT tag",
+
   "ability.none": "Toggle Ability",
   "ability.control": "Control",
   "ability.separation": "Separation",
   "ability.clairvoyance": "Clairvoyance",
+  "ability.beam": "Toolflux",
+
   "snom.subtitle.flip_book": "Flipping Book",
-  "snom.subtitle.close_book": "Closing Book"
+  "snom.subtitle.close_book": "Closing Book",
+
+  "dungeon.boss.name": "§6Soul Master",
+  "dungeon.boss.tnt": "Taste some TNT!",
+  "dungeon.boss.spiders": "I hope you are not arachnophobic!",
+  "dungeon.boss.irongolems": "Defend yourself from these little buddies!",
+  "dungeon.boss.blaze": "I think it's hot here, isn't it %s?",
+  "dungeon.boss.item1": "Welcome! This room is a bit particular..",
+  "dungeon.boss.item2": "Do you see that item frame? What's the item that is displayed on it? You must answer by pressing one of these buttons...",
+  "dungeon.boss.item3": "Choose Carefully...",
+  "dungeon.boss.item4": "Good luck %s!",
+  "boss.dungeon.noteblock": "Click the button to start the challenge!",
+  "boss.dungeon.noteblock2": "Do it again, one more time!"
 }

@@ -2,9 +2,10 @@ package com.pier.snom.world.structure;
 
 import com.mojang.datafixers.Dynamic;
 import com.pier.snom.SoulnomiconMain;
-import net.minecraft.util.math.BlockPos;
+import com.pier.snom.world.save.DungeonDataSave;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MutableBoundingBox;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.gen.ChunkGenerator;
@@ -16,32 +17,33 @@ import net.minecraft.world.gen.feature.template.TemplateManager;
 import java.util.Random;
 import java.util.function.Function;
 
-public class TestStructure extends Structure<NoFeatureConfig>
+public class DungeonStructure extends Structure<NoFeatureConfig>
 {
-    public TestStructure(Function<Dynamic<?>, ? extends NoFeatureConfig> configFactoryIn)
+    public DungeonStructure(Function<Dynamic<?>, ? extends NoFeatureConfig> configFactoryIn)
     {
         super(configFactoryIn);
-        this.setRegistryName(SoulnomiconMain.ID, "wowowow");
+        this.setRegistryName(SoulnomiconMain.ID, "dungeon");
     }
 
     /**
      * decide whether the Structure can be generated
      */
-    public boolean canBeGenerated(BiomeManager biomeManagerIn, ChunkGenerator<?> generatorIn, Random randIn, int chunkX, int chunkZ, Biome biomeIn) {
+    public boolean canBeGenerated(BiomeManager biomeManagerIn, ChunkGenerator<?> generatorIn, Random randIn, int chunkX, int chunkZ, Biome biomeIn)
+    {
         ChunkPos chunkpos = this.getStartPositionForPosition(generatorIn, randIn, chunkX, chunkZ, 0, 0);
-        return chunkX == chunkpos.x && chunkZ == chunkpos.z && generatorIn.hasStructure(biomeIn, this);
-    }
+        return chunkX == chunkpos.x && chunkZ == chunkpos.z && generatorIn.hasStructure(biomeIn, this) && randIn.nextDouble() < 0.002D;
+     }
 
     @Override
     public IStartFactory getStartFactory()
     {
-        return TestStructure.Start::new;
+        return DungeonStructure.Start::new;
     }
 
     @Override
     public String getStructureName()
     {
-        return SoulnomiconMain.ID + ":wowowow";
+        return SoulnomiconMain.ID + ":dungeon";
     }
 
     @Override
@@ -63,12 +65,24 @@ public class TestStructure extends Structure<NoFeatureConfig>
         {
             int i = chunkX * 16;
             int j = chunkZ * 16;
-            BlockPos blockpos = new BlockPos(i, 90, j);
-            this.components.add(new TestStructurePieces(templateManagerIn, blockpos));
+            DungeonStructurePieces.Start start = new DungeonStructurePieces.Start(this.rand, i, j);
+            this.components.add(start);
+            start.buildComponent(start,components,rand);
             this.recalculateStructureSize();
+            start.setDungeonBoundingBox(this.bounds);
 
         }
 
+        @Override
+        public void generateStructure(IWorld p_225565_1_, ChunkGenerator<?> p_225565_2_, Random p_225565_3_, MutableBoundingBox p_225565_4_, ChunkPos p_225565_5_)
+        {
 
+            DungeonStructurePieces.Start start = (DungeonStructurePieces.Start) this.components.get(0);
+            DungeonDataSave dungeonDataSave = DungeonDataSave.getSave(p_225565_1_.getWorld());
+            if(dungeonDataSave != null)
+                dungeonDataSave.addNewDungeon(start.dungeonUUID,start.dungeonBoundingBox,start.roomSections,start.dungeonStartPos);
+
+            super.generateStructure(p_225565_1_, p_225565_2_, p_225565_3_, p_225565_4_, p_225565_5_);
+        }
     }
 }

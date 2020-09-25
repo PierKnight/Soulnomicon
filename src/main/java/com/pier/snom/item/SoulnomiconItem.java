@@ -61,7 +61,9 @@ public class SoulnomiconItem extends Item
         if(entityLiving instanceof PlayerEntity)
         {
             if(Integer.MAX_VALUE - timeLeft < 3)
+            {
                 System.out.println("clicked");
+            }
 
 
         }

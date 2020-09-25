@@ -2,6 +2,7 @@ package com.pier.snom.client;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.pier.snom.SoulnomiconMain;
 import com.pier.snom.capability.ISoulPlayer;
 import com.pier.snom.capability.SoulPlayerProvider;
@@ -16,10 +17,13 @@ import com.pier.snom.client.render.entity.RenderSoulPlayer;
 import com.pier.snom.client.render.soulnomicon.SoulnomiconRenderer;
 import com.pier.snom.item.SoulnomiconItem;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISound;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.BakedQuad;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -28,15 +32,16 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
@@ -220,12 +225,47 @@ public class ClientEvents
 
     }
 
+    public static void resetBlockBreaking(BlockPos blockPos)
+    {
+        Minecraft mc = Minecraft.getInstance();
+        if(mc.world != null && mc.playerController != null && mc.player != null)
+        {
+            mc.world.sendBlockBreakProgress(mc.player.getEntityId(), blockPos, -1);
+        }
+    }
+
+    public static void damageBlock(PlayerEntity player, BlockPos blockPos, Direction direction)
+    {
+        Minecraft mc = Minecraft.getInstance();
+        if(player.equals(mc.player) && mc.playerController != null)
+            mc.playerController.onPlayerDamageBlock(blockPos, direction);
+
+    }
+
+
+    @SubscribeEvent
+    public static void cancelHighLightWhileUsingBeam(DrawHighlightEvent event)
+    {
+        Minecraft mc = Minecraft.getInstance();
+        PlayerEntity player = mc.player;
+        if(player == null)
+            return;
+        player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(iSoulPlayer ->
+        {
+            if(iSoulPlayer.getAbilitiesManager().getBeamAbility().isActive())
+                event.setCanceled(true);
+        });
+    }
+
+
     private static boolean isVec3dInCollisionBox(World world, PlayerEntity player, Vec3d vec3d)
     {
         List<AxisAlignedBB> collisions = world.getCollisionShapes(null, new AxisAlignedBB(vec3d, vec3d).grow(0.01D), Collections.singleton(player)).flatMap((voxelShape) -> voxelShape.toBoundingBoxList().stream()).collect(Collectors.toList());
         return !collisions.isEmpty();
     }
 
+
+    public static long test = 0;
 
     @SubscribeEvent
     public static void renderWorld(RenderWorldLastEvent event)
@@ -236,6 +276,9 @@ public class ClientEvents
         ClientWorld world = mc.world;
         if(world == null)
             return;
+
+        if(!mc.isGamePaused())
+            test += 1.2;
 
         //render soulnomicon near players
         for (AbstractClientPlayerEntity player : world.getPlayers())
@@ -251,21 +294,119 @@ public class ClientEvents
                 if(entityIn != null && !(entityIn.equals(pl) && mc.gameSettings.thirdPersonView == 0))
                     renderSoulnomiconThirdPerson(entityIn, soulPlayer, event.getPartialTicks(), bookHand, event.getMatrixStack());
 
+                ActiveRenderInfo renderInfo = mc.gameRenderer.getActiveRenderInfo();
+
+
+                for (EnumAbility i : EnumAbility.values())
+                    if(i != EnumAbility.NONE)
+                        soulPlayer.getAbilitiesManager().getAbility(i).getRenderer().renderInWorld(event.getMatrixStack(), mc, world, player, soulPlayer, renderInfo.getProjectedView(), event.getPartialTicks());
+
+
             });
         }
 
 
-        ActiveRenderInfo renderInfo = mc.gameRenderer.getActiveRenderInfo();
+    }
 
-        pl.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(iSoulPlayer ->
+    @SubscribeEvent
+    public static void renderWorld(PlaySoundEvent event)
+    {
+        ISound sound = event.getSound();
+        World world = Minecraft.getInstance().world;
+        if(world != null && shouldCancelSound(sound))
         {
-            for (EnumAbility i : EnumAbility.values())
-                if(i != EnumAbility.NONE)
-                    iSoulPlayer.getAbilitiesManager().getAbility(i).getRenderer().renderInWorld(event.getMatrixStack(), mc, world, pl, iSoulPlayer, renderInfo.getProjectedView(), event.getPartialTicks());
-        });
+            AxisAlignedBB box = new AxisAlignedBB(sound.getX(), sound.getY(), sound.getZ(), sound.getX(), sound.getY(), sound.getZ()).grow(0.2D);
+            List<PlayerEntity> players = world.getEntitiesWithinAABB(PlayerEntity.class, box);
+            if(!players.isEmpty())
+            {
+                PlayerEntity player = players.get(0);
+                player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(iSoulPlayer ->
+                {
+                    if(iSoulPlayer.getAbilitiesManager().getBeamAbility().isActive())
+                        event.setResultSound(null);
+                });
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void renderItemFrame(RenderItemInFrameEvent event)
+    {
+
+
+        MatrixStack matrixStack = event.getMatrix();
+        ItemStack stack = event.getItem();
+
+        CompoundNBT tag = stack.getTag();
+
+        if(tag != null && tag.getBoolean("isDungeonSilhouette"))
+        {
+            matrixStack.scale(0.5F, 0.5F, 0.5F);
+
+            RenderType rendertype = RenderTypeLookup.getRenderType(stack);
+
+            IBakedModel ibakedmodel = Minecraft.getInstance().getItemRenderer().getItemModelWithOverrides(stack, null, null);
+            ibakedmodel = net.minecraftforge.client.ForgeHooksClient.handleCameraTransforms(matrixStack, ibakedmodel, ItemCameraTransforms.TransformType.FIXED, false);
+            IVertexBuilder ivertexbuilder = ItemRenderer.getBuffer(event.getBuffers(), rendertype, true, false);
+            matrixStack.push();
+            matrixStack.translate(-0.5D, -0.5D, -0.5D);
+            renderSilhouetteModel(ibakedmodel, stack, event.getLight(), matrixStack, ivertexbuilder);
+            matrixStack.pop();
+
+            event.setCanceled(true);
+        }
 
     }
 
+    @SuppressWarnings("deprecation")
+    private static void renderSilhouetteModel(IBakedModel modelIn, ItemStack stack, int combinedLightIn, MatrixStack matrixStackIn, IVertexBuilder bufferIn)
+    {
+        Random random = new Random();
+
+        for (Direction direction : Direction.values())
+        {
+            random.setSeed(42L);
+            renderBlackQuads(matrixStackIn, bufferIn, modelIn.getQuads(null, direction, random), stack, combinedLightIn, OverlayTexture.NO_OVERLAY);
+        }
+
+        random.setSeed(42L);
+        renderBlackQuads(matrixStackIn, bufferIn, modelIn.getQuads(null, null, random), stack, combinedLightIn, OverlayTexture.NO_OVERLAY);
+    }
+
+    private static void renderBlackQuads(MatrixStack matrixStackIn, IVertexBuilder bufferIn, List<BakedQuad> quadsIn, ItemStack itemStackIn, int combinedLightIn, int combinedOverlayIn)
+    {
+        MatrixStack.Entry entry = matrixStackIn.getLast();
+
+        for (BakedQuad bakedquad : quadsIn)
+        {
+            bufferIn.addVertexData(entry, bakedquad, 0F, 0F, 0F, combinedLightIn, combinedOverlayIn, true);
+        }
+
+    }
+
+
+    private static boolean shouldCancelSound(ISound sound)
+    {
+        ResourceLocation soundLocation = sound.getSoundLocation();
+        if(isSameSound(soundLocation, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP))
+            return true;
+        else if(isSameSound(soundLocation, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE))
+            return true;
+        else if(isSameSound(soundLocation, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT))
+            return true;
+        else if(isSameSound(soundLocation, SoundEvents.ENTITY_PLAYER_ATTACK_KNOCKBACK))
+            return true;
+        else if(isSameSound(soundLocation, SoundEvents.ENTITY_PLAYER_ATTACK_STRONG))
+            return true;
+        else
+            return isSameSound(soundLocation, SoundEvents.ENTITY_PLAYER_ATTACK_WEAK);
+
+    }
+
+    private static boolean isSameSound(ResourceLocation soundLocation, SoundEvent soundEvent)
+    {
+        return soundLocation.equals(soundEvent.getRegistryName());
+    }
 
     private static void renderSoulnomiconThirdPerson(LivingEntity player, ISoulPlayer soulPlayer, float partialTicks, HandSide hand, MatrixStack matrixStack)
     {

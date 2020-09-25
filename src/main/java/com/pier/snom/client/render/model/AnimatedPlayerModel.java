@@ -45,7 +45,7 @@ public class AnimatedPlayerModel extends PlayerModel<AbstractClientPlayerEntity>
             {
                 ISoulAbility<?> ability = soulPlayer.getAbilitiesManager().getSelectedAbility();
                 if(ability != null)
-                    ability.getRenderer().applyTransforms(entityIn, this, soulPlayer, ClientEvents.getPartialTicks());
+                    ability.getRenderer().applyTransforms(entityIn, this, soulPlayer, ClientEvents.getPartialTicks(), netHeadYaw, headPitch);
             });
         }
     }

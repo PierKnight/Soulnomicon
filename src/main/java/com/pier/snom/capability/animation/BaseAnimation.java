@@ -36,8 +36,8 @@ public class BaseAnimation
 
     public float getAnimationF(float partialTicks, int start, int end)
     {
-        int prevTicks = Math.max(0, this.prevTicks - start);
-        int ticks = Math.max(0, this.ticks - start);
+        int prevTicks = MathHelper.clamp(this.prevTicks - start,0,end);
+        int ticks = MathHelper.clamp(this.ticks - start,0,end);
         return MathHelper.lerp(partialTicks, prevTicks, ticks) / (end - start);
     }
 

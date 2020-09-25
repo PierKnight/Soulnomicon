@@ -1,4 +1,4 @@
-package com.pier.snom.world;
+package com.pier.snom.world.save;
 
 import com.pier.snom.SoulnomiconMain;
 import com.pier.snom.capability.PlayerData;
@@ -88,7 +88,6 @@ public class SavedBodyPlayers extends WorldSavedData
     @Nonnull
     public CompoundNBT write(@Nonnull CompoundNBT compound)
     {
-        CompoundNBT saveNBT = new CompoundNBT();
 
         ListNBT listNBT = new ListNBT();
         playerBodies.forEach((uuid, bodyData) ->
@@ -100,8 +99,8 @@ public class SavedBodyPlayers extends WorldSavedData
         });
 
         if(!listNBT.isEmpty())
-            saveNBT.put("bodiesDataList", listNBT);
+            compound.put("bodiesDataList", listNBT);
 
-        return saveNBT;
+        return compound;
     }
 }

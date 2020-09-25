@@ -8,7 +8,7 @@ import com.pier.snom.capability.animation.DeathSoulPlayerAnimation;
 import com.pier.snom.capability.render.SeparationAbilityRenderer;
 import com.pier.snom.client.particle.SoulPlayerParticleData;
 import com.pier.snom.entity.PlayerBodyEntity;
-import com.pier.snom.world.SavedBodyPlayers;
+import com.pier.snom.world.save.SavedBodyPlayers;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;

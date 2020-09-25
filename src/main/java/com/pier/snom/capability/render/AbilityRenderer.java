@@ -33,7 +33,7 @@ public abstract class AbilityRenderer<T extends ISoulAbility<?>>
      * use this to edit player model rotation,position ,scale etc..
      * only if method {@link AnimatedPlayerModel#applyAbilityTransforms()} is true
      */
-    public void applyTransforms(AbstractClientPlayerEntity player, AnimatedPlayerModel model, ISoulPlayer soulPlayer, float partialTicks) {}
+    public void applyTransforms(AbstractClientPlayerEntity player, AnimatedPlayerModel model, ISoulPlayer soulPlayer, float partialTicks, float netYaw, float headPitch) {}
 
     public void renderHand(Minecraft mc, ClientPlayerEntity player, ISoulPlayer soulPlayer, RenderHandEvent event)
     {

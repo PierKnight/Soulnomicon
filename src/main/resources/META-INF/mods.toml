@@ -3,7 +3,7 @@ loaderVersion="[31,)"
 issueTrackerURL="https://github.com/PierKnight100/Soulnomicon/issues"
 [[mods]]
 modId="snom"
-version="0.0.1"
+version="0.1.0"
 displayName="Soulnomicon"
 updateJSONURL="http://myurl.me/"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/soulnomicon"

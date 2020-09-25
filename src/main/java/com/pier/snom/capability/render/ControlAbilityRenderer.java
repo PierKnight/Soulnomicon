@@ -88,7 +88,7 @@ public class ControlAbilityRenderer extends AbilityRenderer<ControlAbility>
     }
 
     @Override
-    public void applyTransforms(AbstractClientPlayerEntity player, AnimatedPlayerModel model, ISoulPlayer soulPlayer, float partialTicks)
+    public void applyTransforms(AbstractClientPlayerEntity player, AnimatedPlayerModel model, ISoulPlayer soulPlayer, float partialTicks, float netYaw, float headPitch)
     {
 
         Entity entity = player.world.getEntityByID(ability.selectedEntityID);

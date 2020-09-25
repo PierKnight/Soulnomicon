@@ -9,7 +9,8 @@ public enum EnumAbility
     NONE("none"),
     SEPARATION("separation"),
     CONTROL("control"),
-    CLAIRVOYANCE("clairvoyance");
+    CLAIRVOYANCE("clairvoyance"),
+    BEAM("beam");
 
 
     private final String name;

@@ -40,13 +40,15 @@ public class KeyBoardHandler
 
         if(SeparationAbility.isSeparated(player))
             event.setCanceled(true);
+
         player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(soulPlayer ->
         {
             if(soulPlayer.getAbilitiesManager().getControl().isControllingEntity())
-            {
                 PacketManager.channel.sendToServer(new PacketScrollControlDistance(event.getScrollDelta()));
+
+            ISoulAbility<?> selectedAbility = soulPlayer.getAbilitiesManager().getSelectedAbility();
+            if(selectedAbility != null && selectedAbility.shouldBlockInteractions(player,soulPlayer))
                 event.setCanceled(true);
-            }
         });
 
     }
@@ -66,6 +68,7 @@ public class KeyBoardHandler
 
         player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(soulPlayer ->
         {
+
             if(showAbilityWheel(player, soulPlayer))
             {
                 if(mc.currentScreen == null)
@@ -87,6 +90,7 @@ public class KeyBoardHandler
                 Minecraft.getInstance().gameSettings.thirdPersonView = prevPersonView;
                 prevPersonView = -1;
             }
+
 
 
         });
@@ -114,8 +118,6 @@ public class KeyBoardHandler
             return;
         player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(soulPlayer ->
         {
-            //   if(soulPlayer.getAbilitiesManager().getSeparation().isSeparated)
-            //  {
             GameSettings settings = minecraft.gameSettings;
             boolean isSeparated = soulPlayer.getAbilitiesManager().getSeparation().isSeparated;
             ISoulAbility<?> ability = soulPlayer.getAbilitiesManager().getSelectedAbility();
@@ -133,8 +135,6 @@ public class KeyBoardHandler
                     }
             }
 
-
-            //  }
         });
 
 

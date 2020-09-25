@@ -4,8 +4,10 @@ import com.pier.snom.capability.PlayerData;
 import com.pier.snom.capability.SoulPlayerProvider;
 import com.pier.snom.capability.abilities.SeparationAbility;
 import com.pier.snom.entity.PlayerBodyEntity;
+import com.pier.snom.init.ModBlocks;
 import com.pier.snom.network.PacketManager;
 import com.pier.snom.network.client.PacketUpdateCapability;
+import com.pier.snom.world.save.DungeonDataSave;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
@@ -25,6 +27,7 @@ import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -47,6 +50,40 @@ public class ModEvents
         if(event.getObject() instanceof PlayerEntity)
             event.addCapability(new ResourceLocation(SoulnomiconMain.ID, "soul_cap"), new SoulPlayerProvider());
 
+    }
+
+    @SubscribeEvent
+    public static void worldTick(TickEvent.WorldTickEvent event)
+    {
+
+        if(event.side.isServer() && event.phase == TickEvent.Phase.START)
+        {
+            DungeonDataSave dungeonDataSave = DungeonDataSave.getSave(event.world);
+            dungeonDataSave.updateDungeonChallenges(event.world);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onExplosionEvent(ExplosionEvent.Detonate event)
+    {
+        DungeonDataSave dungeonDataSave = DungeonDataSave.getSave(event.getWorld());
+        if(dungeonDataSave != null)
+            event.getAffectedBlocks().removeIf(dungeonDataSave::isBlockPosInsideDungeon);
+    }
+
+    @SubscribeEvent
+    public static void dungeonCancelEvent(PlayerInteractEvent event)
+    {
+        World world = event.getWorld();
+
+
+        if(!event.getWorld().isRemote && world.getBlockState(event.getPos()).getBlock() != ModBlocks.DUNGEON_BUTTON && !(event instanceof PlayerInteractEvent.RightClickItem) && !(event instanceof PlayerInteractEvent.LeftClickEmpty) && !(event instanceof PlayerInteractEvent.RightClickEmpty))
+        {
+
+            DungeonDataSave save = DungeonDataSave.getSave(world);
+            if(save.isPlayerChallenging(event.getPlayer()))
+                event.setCanceled(true);
+        }
     }
 
 
