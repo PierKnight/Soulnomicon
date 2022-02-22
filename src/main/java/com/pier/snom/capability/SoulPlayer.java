@@ -1,8 +1,5 @@
 package com.pier.snom.capability;
 
-import com.pier.snom.capability.abilities.AbilitiesManager;
-import com.pier.snom.capability.abilities.EnumAbility;
-import com.pier.snom.capability.abilities.ISoulAbility;
 import com.pier.snom.init.ModDamageSource;
 import com.pier.snom.network.PacketManager;
 import com.pier.snom.network.client.PacketUpdateCapability;
@@ -15,7 +12,6 @@ public class SoulPlayer implements ISoulPlayer
 {
 
 
-    private AbilitiesManager abilitiesManager = new AbilitiesManager();
 
     private float maxHealth = 6F;
     private float health = 6F;
@@ -61,7 +57,7 @@ public class SoulPlayer implements ISoulPlayer
     public void useSoulHealth(PlayerEntity player, float amount)
     {
         this.health = MathHelper.clamp(this.health + amount, 0.0F, this.maxHealth);
-        if(this.health == 0.0F && this.abilitiesManager.selectedAbilityIndex != EnumAbility.SEPARATION.ordinal())
+        if(this.health == 0.0F)
         {
             player.attackEntityFrom(ModDamageSource.CONSUMED_SOUL, Float.MAX_VALUE);
         }
@@ -82,7 +78,6 @@ public class SoulPlayer implements ISoulPlayer
         CompoundNBT nbt = new CompoundNBT();
         nbt.putFloat("maxSoulHealth", this.maxHealth);
         nbt.putFloat("soulHealth", this.health);
-        this.abilitiesManager.writeToNBT(nbt);
 
         return nbt;
     }
@@ -92,28 +87,14 @@ public class SoulPlayer implements ISoulPlayer
     {
         this.maxHealth = nbt.getFloat("maxSoulHealth");
         this.health = nbt.getFloat("soulHealth");
-        this.abilitiesManager.readFromNBT(nbt);
 
-    }
-
-    @Override
-    public AbilitiesManager getAbilitiesManager()
-    {
-        return this.abilitiesManager;
     }
 
     @Override
     public void update(PlayerEntity player)
     {
-        //recover soul health every 5 seconds
-        ISoulAbility<?> ability = this.getAbilitiesManager().getSelectedAbility();
 
-        if(this.health > 0.0F && player.world.getGameTime() % 20 == 0 && (ability == null || ability.shouldRegenPlayer(player,this)))
-            recoverSoul(player, 0.2F);
-
-        abilitiesManager.update(player, this);
     }
-
 
     public static void updatePlayerData(PlayerEntity player)
     {

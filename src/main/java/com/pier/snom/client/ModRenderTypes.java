@@ -1,5 +1,6 @@
 package com.pier.snom.client;
 
+import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -20,7 +21,7 @@ public class ModRenderTypes extends RenderType
     public static final RenderType HIGHLIGHT_LINES = makeType("overlay_lines",
             DefaultVertexFormats.POSITION_COLOR, GL11.GL_LINES, 256,
             RenderType.State.getBuilder().line(NORMAL_LINES)
-                    .layer(PROJECTION_LAYERING)
+                    .layer(RenderState.NO_LAYERING)
                     .transparency(TRANSLUCENT_TRANSPARENCY)
                     .texture(NO_TEXTURE)
                     .depthTest(DEPTH_ALWAYS)

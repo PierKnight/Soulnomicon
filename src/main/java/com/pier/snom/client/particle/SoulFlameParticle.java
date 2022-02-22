@@ -1,28 +1,25 @@
 package com.pier.snom.client.particle;
 
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import com.pier.snom.capability.abilities.SeparationAbility;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.UUID;
 
 @OnlyIn(Dist.CLIENT)
 public class SoulFlameParticle extends SpriteTexturedParticle
 {
-    private final UUID soulPlayerUUID;
     private final IAnimatedSprite animatedSprite;
 
-    private SoulFlameParticle(World worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, @Nullable UUID soulPlayerUUID, IAnimatedSprite animatedSprite)
+    private SoulFlameParticle(ClientWorld worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, IAnimatedSprite animatedSprite)
     {
         super(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
         this.motionX = this.motionX * (double) 0.01F + xSpeedIn;
@@ -33,7 +30,6 @@ public class SoulFlameParticle extends SpriteTexturedParticle
         this.posZ += (this.rand.nextFloat() - this.rand.nextFloat()) * 0.05F;
         this.maxAge = 20 + rand.nextInt(15);
         this.setSize(0.15F, 0.15F);
-        this.soulPlayerUUID = soulPlayerUUID;
         this.animatedSprite = animatedSprite;
         this.particleScale *= 0.6F;
 
@@ -110,9 +106,9 @@ public class SoulFlameParticle extends SpriteTexturedParticle
     {
         PlayerEntity player = Minecraft.getInstance().player;
 
-        double distance = player != null ? player.getEyePosition(partialTicks).distanceTo(new Vec3d(this.posX,this.posY,this.posZ)) : 0D;
+        double distance = player != null ? player.getEyePosition(partialTicks).distanceTo(new Vector3d(this.posX,this.posY,this.posZ)) : 0D;
 
-        if(renderInfo.isThirdPerson() || player != null && (!SeparationAbility.isSeparated(player) || distance > 1D))
+        if(renderInfo.isThirdPerson() || distance > 1D)
             super.renderParticle(buffer, renderInfo, partialTicks);
     }
 
@@ -128,9 +124,11 @@ public class SoulFlameParticle extends SpriteTexturedParticle
             this.spriteSet = p_i50823_1_;
         }
 
-        public Particle makeParticle(@Nonnull SoulPlayerParticleData typeIn, @Nonnull World worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        @Nullable
+        @Override
+        public Particle makeParticle(SoulPlayerParticleData typeIn, ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
-            SoulFlameParticle flameParticle = new SoulFlameParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, typeIn.getSoulPlayerUUID(), this.spriteSet);
+            SoulFlameParticle flameParticle = new SoulFlameParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, this.spriteSet);
             flameParticle.selectSpriteWithAge(this.spriteSet);
             return flameParticle;
         }

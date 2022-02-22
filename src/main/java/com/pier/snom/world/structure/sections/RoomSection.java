@@ -160,12 +160,12 @@ public abstract class RoomSection
     public void sendMessage(List<PlayerEntity> players, String unlocalized_phrase, ITextComponent... textComponents)
     {
         TranslationTextComponent bossNameComponent = new TranslationTextComponent("dungeon.boss.name");
-        String bossName = "[" + bossNameComponent.getFormattedText() + "§f]";
+        String bossName = "[" + bossNameComponent.getString() + "§f]";
 
         players.forEach(player ->
         {
             TranslationTextComponent phraseComponent = new TranslationTextComponent(unlocalized_phrase, player.getDisplayName(),textComponents);
-            player.sendMessage(new StringTextComponent(bossName + " " + phraseComponent.getFormattedText()));
+            player.sendStatusMessage(new StringTextComponent(bossName + " " + phraseComponent.getString()),false);
         });
     }
 

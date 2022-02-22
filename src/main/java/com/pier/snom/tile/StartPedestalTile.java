@@ -2,6 +2,7 @@ package com.pier.snom.tile;
 
 import com.pier.snom.init.ModTiles;
 import com.pier.snom.world.save.DungeonDataSave;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
@@ -35,9 +36,9 @@ public class StartPedestalTile extends TileEntity
     }
 
     @Override
-    public void read(@Nonnull CompoundNBT compound)
+    public void read(@Nonnull BlockState state, @Nonnull CompoundNBT compound)
     {
-        super.read(compound);
+        super.read(state,compound);
         if(compound.hasUniqueId("dungeonUUID"))
             this.dungeonUUID = compound.getUniqueId("dungeonUUID");
     }

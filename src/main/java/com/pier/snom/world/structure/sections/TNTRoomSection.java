@@ -7,7 +7,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -33,7 +33,7 @@ public class TNTRoomSection extends RoomSection
         {
             if(world.getGameTime() % 12 == 0)
             {
-                Vec3d tntPosition = this.getRoomBox().getCenter();
+                Vector3d tntPosition = this.getRoomBox().getCenter();
                 TNTEntity tnt = new TNTEntity(world, tntPosition.x, tntPosition.y, tntPosition.z, null);
                 tnt.setMotion(rand.nextDouble() - 0.5D,0.2D + rand.nextDouble() * 0.4D,rand.nextDouble() - 0.5D);
                 world.addEntity(tnt);

@@ -1,6 +1,7 @@
 modLoader="javafml"
 loaderVersion="[31,)"
 issueTrackerURL="https://github.com/PierKnight100/Soulnomicon/issues"
+license="<your license here>"
 [[mods]]
 modId="snom"
 version="0.1.0"
@@ -22,6 +23,6 @@ Welcome and thanks for using the Soulnomicon mod! This mod adds new abilities (o
 [[dependencies.snom]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.15.2]"
+    versionRange="[1.16.5]"
     ordering="NONE"
     side="BOTH"

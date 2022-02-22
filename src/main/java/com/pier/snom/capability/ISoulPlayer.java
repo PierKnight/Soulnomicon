@@ -1,6 +1,5 @@
 package com.pier.snom.capability;
 
-import com.pier.snom.capability.abilities.AbilitiesManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 
@@ -13,8 +12,6 @@ public interface ISoulPlayer
     CompoundNBT writeToNBT();
 
     void readFromNBT(CompoundNBT nbt);
-
-    AbilitiesManager getAbilitiesManager();
 
     void update(PlayerEntity player);
 

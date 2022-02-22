@@ -1,6 +1,5 @@
 package com.pier.snom.init;
 
-import com.pier.snom.entity.PlayerBodyEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
@@ -22,25 +21,6 @@ public class ModDamageSource
         return new EntityDamageSource("smash", attacker);
     }
 
-    public static class BodyDamageSource extends DamageSource
-    {
-        private final PlayerBodyEntity playerBodyEntity;
-
-        public BodyDamageSource(PlayerBodyEntity playerBodyEntity)
-        {
-            super("bodyDeath");
-            this.playerBodyEntity = playerBodyEntity;
-        }
-
-
-        @Override
-        @Nonnull
-        public ITextComponent getDeathMessage(LivingEntity entityLivingBaseIn)
-        {
-            return playerBodyEntity.getCombatTracker().getDeathMessage();
-        }
-
-    }
 
     private static final Random RAND = new Random();
 
@@ -60,10 +40,10 @@ public class ModDamageSource
         public ITextComponent getDeathMessage(@Nonnull LivingEntity entityLivingBaseIn)
         {
             TranslationTextComponent bossNameComponent = new TranslationTextComponent("dungeon.boss.name");
-            String bossName = "[" + bossNameComponent.getFormattedText() + "§f]";
+            String bossName = "[" + bossNameComponent.getString() + "§f]";
 
 
-            return new StringTextComponent(bossName + " " + new TranslationTextComponent(getDamageType() + RAND.nextInt(2),entityLivingBaseIn.getDisplayName()).getFormattedText());
+            return new StringTextComponent(bossName + " " + new TranslationTextComponent(getDamageType() + RAND.nextInt(2),entityLivingBaseIn.getDisplayName()).getString());
         }
 
     }

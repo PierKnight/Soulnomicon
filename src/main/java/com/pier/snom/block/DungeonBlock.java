@@ -2,7 +2,6 @@ package com.pier.snom.block;
 
 import com.pier.snom.SoulnomiconMain;
 import com.pier.snom.client.particle.SoulPlayerParticleData;
-import net.minecraft.block.BedrockBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
@@ -20,7 +19,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.Random;
 
-public class DungeonBlock extends BedrockBlock
+public class DungeonBlock extends Block
 {
     public DungeonBlock(String name)
     {
@@ -72,7 +71,7 @@ public class DungeonBlock extends BedrockBlock
             d0 = (double)i + axisalignedbb.maxX + (double)0.1F;
         }
 
-        SoulPlayerParticleData soulPlayerParticleData = new SoulPlayerParticleData(null);
+        SoulPlayerParticleData soulPlayerParticleData = new SoulPlayerParticleData();
 
         manager.addParticle(soulPlayerParticleData, d0, d1, d2, 0.0D, 0.0D, 0.0D);
         return true;

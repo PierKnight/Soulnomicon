@@ -6,6 +6,7 @@ import com.pier.snom.world.save.DungeonDataSave;
 import com.pier.snom.world.structure.sections.ItemQuestionSection;
 import com.pier.snom.world.structure.sections.NoteBlockSection;
 import com.pier.snom.world.structure.sections.RoomSection;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
@@ -88,16 +89,13 @@ public class DungeonButtonTile extends TileEntity
     }
 
     @Override
-    public void read(@Nonnull CompoundNBT compound)
+    public void read(BlockState state, CompoundNBT nbt)
     {
-        super.read(compound);
-        this.isCorrect = compound.getBoolean("isCorrect");
-        this.noteblockIndex = compound.getInt("noteblockIndex");
+        super.read(state, nbt);
+        this.isCorrect = nbt.getBoolean("isCorrect");
+        this.noteblockIndex = nbt.getInt("noteblockIndex");
 
-        if(compound.hasUniqueId("dungeonUUID"))
-            this.dungeonUUID = compound.getUniqueId("dungeonUUID");
-
+        if(nbt.hasUniqueId("dungeonUUID"))
+            this.dungeonUUID = nbt.getUniqueId("dungeonUUID");
     }
-
-
 }

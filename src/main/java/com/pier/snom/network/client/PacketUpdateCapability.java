@@ -57,15 +57,9 @@ public class PacketUpdateCapability
 
                 World world = player.world;
 
-                if(pkt.playerToUpdateUUID.equals(player.getUniqueID()))
-                {
-                    playerToUpdate = player;
-                }
-                else
-                {
-                    //get the player to update
-                    playerToUpdate = world.getPlayerByUuid(pkt.playerToUpdateUUID);
-                }
+                //get the player to update
+                playerToUpdate = world.getPlayerByUuid(pkt.playerToUpdateUUID);
+
 
                 //updates the capability on the client side
                 if(playerToUpdate != null)

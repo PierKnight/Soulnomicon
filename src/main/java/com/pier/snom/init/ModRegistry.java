@@ -2,25 +2,25 @@ package com.pier.snom.init;
 
 import com.pier.snom.SoulnomiconMain;
 import com.pier.snom.client.particle.ModParticles;
-import com.pier.snom.client.render.soulnomicon.SoulnomiconBakedModel;
 import com.pier.snom.entity.EntityRegistry;
 import com.pier.snom.world.structure.ModStructures;
 import net.minecraft.block.Block;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.item.Item;
 import net.minecraft.particles.ParticleType;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
-import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -56,7 +56,7 @@ public class ModRegistry
     @SubscribeEvent
     public static void onParticlesRegistry(final RegistryEvent.Register<ParticleType<?>> event)
     {
-        ModParticles.registerParticleTypes(event.getRegistry());
+       // ModParticles.registerParticleTypes(event.getRegistry());
     }
 
     @SubscribeEvent
@@ -66,7 +66,7 @@ public class ModRegistry
     }
 
     @SubscribeEvent
-    public static void onFeatureRegistry(final RegistryEvent.Register<Feature<?>> event)
+    public static void onFeatureRegistry(final RegistryEvent.Register<Structure<?>> event)
     {
         ModStructures.init(event);
     }
@@ -87,13 +87,12 @@ public class ModRegistry
     {
         ModelResourceLocation location = new ModelResourceLocation(new ResourceLocation(SoulnomiconMain.ID, "soulnomicon"), "inventory");
         IBakedModel original = event.getModelRegistry().get(location);
-        event.getModelRegistry().put(location, new SoulnomiconBakedModel(original));
     }
 
-    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
-    public static void stitchTexture(TextureStitchEvent.Pre event)
+    public static void registerAttributes(EntityAttributeCreationEvent event)
     {
-        //event.addSprite(SoulnomiconRenderer.DEATH_NOTE);
+        event.put(EntityRegistry.SOUL_MASTER_ENTITY, ZombieEntity.func_234342_eQ_().create());
     }
+
 }
