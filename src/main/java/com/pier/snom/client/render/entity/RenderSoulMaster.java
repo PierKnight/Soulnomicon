@@ -51,7 +51,7 @@ public class RenderSoulMaster extends MobRenderer<SoulMasterEntity, SoulMasterMo
 
         for (int t = 0; t < stacks; t++)
         {
-            double theta1 = ((double) (t) / stacks) * Math.PI + offset * 0.03D;
+            double theta1 = (((double) (t) / stacks) * Math.PI + offset * 0.03D) % Math.PI;;
 
             for (int p = 0; p < slices; p++)
             {

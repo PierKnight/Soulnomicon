@@ -101,7 +101,7 @@ public class ArrowCageGoal extends AttackGoal<SoulMasterEntity>
             while(arrowEntityIterator.hasNext())
             {
                 AbstractArrowEntity arrow = arrowEntityIterator.next();
-                if(!arrow.isAlive() || this.arrowStartPosition.get(arrow.getUniqueID()).squareDistanceTo(arrow.getPositionVec()) >= 20 * 20)
+                if(!arrow.isAlive() || arrow.isEntityInsideOpaqueBlock() || this.arrowStartPosition.get(arrow.getUniqueID()).squareDistanceTo(arrow.getPositionVec()) >= 20 * 20)
                 {
                     arrowEntityIterator.remove();
                     arrowVelocities.remove(arrow.getUniqueID());
