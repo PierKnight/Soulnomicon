@@ -1,237 +1,189 @@
 package com.pier.snom.client.render.model;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.pier.snom.client.ClientEvents;
 import com.pier.snom.entity.soulmaster.SoulMasterEntity;
 import net.minecraft.client.renderer.entity.model.EntityModel;
+import net.minecraft.client.renderer.model.ModelHelper;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.math.MathHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
-import javax.annotation.Nonnull;
+import java.util.Random;
 
-/**
- * Created using Tabula 8.0.0
- */
-@OnlyIn(Dist.CLIENT)
 public class SoulMasterModel extends EntityModel<SoulMasterEntity>
 {
-    public ModelRenderer head;
-    public ModelRenderer rightArm;
-    public ModelRenderer leftArm;
-    public ModelRenderer column1;
-    public ModelRenderer core;
-    public ModelRenderer fingerR1;
-    public ModelRenderer fingerR2;
-    public ModelRenderer fingerR3;
-    public ModelRenderer fingerR4;
-    public ModelRenderer fingerR5;
-    public ModelRenderer fingerL1;
-    public ModelRenderer fingerL2;
-    public ModelRenderer fingerL3;
-    public ModelRenderer fingerL4;
-    public ModelRenderer fingerL5;
-    public ModelRenderer column2;
-    public ModelRenderer column3;
+    // private final ModelRenderer bipedRightArm;
+    //private final ModelRenderer bipedRightLeg;
+    //private final ModelRenderer bipedLeftLeg;
+    //private final ModelRenderer bipedHeadwear;
+    // private final ModelRenderer bipedLeftArm;
+    //private final ModelRenderer bipedBody;
+    //private final ModelRenderer bipedHead;
 
 
-    public LibsModel[] libsModels = new LibsModel[12];
+    public final ModelRenderer bipedHeadwear;
+    public final ModelRenderer bipedHead;
+    public final ModelRenderer leftPart;
+    public final ModelRenderer bipedLeftArm;
+    public final ModelRenderer rightPart;
+    public final ModelRenderer bipedRightArm;
+    public final ModelRenderer hip;
+
 
     public SoulMasterModel()
     {
-        this.textureWidth = 64;
-        this.textureHeight = 64;
-        this.fingerR2 = new ModelRenderer(this, 50, 0);
-        this.fingerR2.setRotationPoint(-0.2F, -2.0F, 0.0F);
-        this.fingerR2.addBox(-0.5F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.fingerL5 = new ModelRenderer(this, 56, 0);
-        this.fingerL5.mirror = true;
-        this.fingerL5.setRotationPoint(-1.5F, -1.0F, 0.0F);
-        this.fingerL5.addBox(-0.5F, -2.0F, -0.5F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.setRotateAngle(fingerL5, 0.0F, 0.0F, -0.6255260065779288F);
-        this.rightArm = new ModelRenderer(this, 40, 0);
-        this.rightArm.setRotationPoint(-10.0F, 5.0F, 0.0F);
-        this.rightArm.addBox(-1.5F, -1.5F, -0.5F, 3.0F, 3.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.fingerR5 = new ModelRenderer(this, 56, 0);
-        this.fingerR5.setRotationPoint(1.5F, -1.0F, 0.0F);
-        this.fingerR5.addBox(-0.5F, -2.0F, -0.5F, 1.0F, 1.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.setRotateAngle(fingerR5, 0.0F, 0.0F, 0.6255260065779288F);
-        this.fingerR4 = new ModelRenderer(this, 50, 0);
-        this.fingerR4.setRotationPoint(-2.0F, -1.0F, 0.0F);
-        this.fingerR4.addBox(-0.5F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.setRotateAngle(fingerR4, 0.0F, 0.0F, -0.6255260065779288F);
-        this.column3 = new ModelRenderer(this, 10, 30);
-        this.column3.setRotationPoint(0.0F, 14.5F, 0.1F);
-        this.column3.addBox(0.0F, 0.0F, 0.0F, 2.0F, 4.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.setRotateAngle(column3, -0.46914448828868976F, 0.0F, 0.0F);
-        this.fingerL3 = new ModelRenderer(this, 50, 0);
-        this.fingerL3.mirror = true;
-        this.fingerL3.setRotationPoint(1.4F, -2.0F, 0.0F);
-        this.fingerL3.addBox(-0.5F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.setRotateAngle(fingerL3, 0.0F, 0.0F, 0.23457224414434488F);
-        this.fingerL1 = new ModelRenderer(this, 50, 0);
-        this.fingerL1.mirror = true;
-        this.fingerL1.setRotationPoint(0.0F, -2.0F, 0.0F);
-        this.fingerL1.addBox(-0.5F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.head = new ModelRenderer(this, 0, 0);
-        this.head.setRotationPoint(0.0F, -4.0F, 0.0F);
-        this.head.addBox(-4.0F, -4.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F, 0.0F, 0.0F);
-        this.fingerR3 = new ModelRenderer(this, 50, 0);
-        this.fingerR3.setRotationPoint(-1.4F, -2.0F, 0.0F);
-        this.fingerR3.addBox(-0.5F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.setRotateAngle(fingerR3, 0.0F, 0.0F, -0.23457224414434488F);
-        this.leftArm = new ModelRenderer(this, 40, 0);
-        this.leftArm.mirror = true;
-        this.leftArm.setRotationPoint(10.0F, 5.0F, 0.0F);
-        this.leftArm.addBox(-1.5F, -1.5F, -0.5F, 3.0F, 3.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.fingerR1 = new ModelRenderer(this, 50, 0);
-        this.fingerR1.setRotationPoint(1.0F, -2.0F, 0.0F);
-        this.fingerR1.addBox(-0.5F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.column2 = new ModelRenderer(this, 10, 30);
-        this.column2.setRotationPoint(0.0F, -3.0F, -1.7F);
-        this.column2.addBox(0.0F, 0.0F, 0.0F, 2.0F, 4.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.setRotateAngle(column2, 0.46914448828868976F, 0.0F, 0.0F);
-        this.core = new ModelRenderer(this, 10, 20);
-        this.core.setRotationPoint(0.0F, 6.0F, 0.0F);
-        this.core.addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, 0.0F, 0.0F, 0.0F);
-        this.fingerL4 = new ModelRenderer(this, 50, 0);
-        this.fingerL4.mirror = true;
-        this.fingerL4.setRotationPoint(2.0F, -1.0F, 0.0F);
-        this.fingerL4.addBox(-0.5F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.setRotateAngle(fingerL4, 0.0F, 0.0F, 0.6255260065779288F);
-        this.fingerL2 = new ModelRenderer(this, 50, 0);
-        this.fingerL2.mirror = true;
-        this.fingerL2.setRotationPoint(-1.2F, -2.0F, 0.0F);
-        this.fingerL2.addBox(-0.5F, -2.0F, -0.5F, 1.0F, 2.0F, 1.0F, 0.0F, 0.0F, 0.0F);
-        this.column1 = new ModelRenderer(this, 0, 20);
-        this.column1.setRotationPoint(-1.0F, 3.0F, 2.0F);
-        this.column1.addBox(0.0F, 0.0F, 0.0F, 2.0F, 15.0F, 1.0F, 0.0F, 0.0F, 0.0F);
+        textureWidth = 64;
+        textureHeight = 32;
 
-        for (int i = 0; i < this.libsModels.length; i++)
-            this.libsModels[i] = new LibsModel(this,i);
+        bipedHeadwear = new ModelRenderer(this);
+        bipedHeadwear.setRotationPoint(0.0F, 0.0F, 0.0F);
+        bipedHeadwear.setTextureOffset(32, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.5F, false);
 
-        this.rightArm.addChild(this.fingerR2);
-        this.leftArm.addChild(this.fingerL5);
-        this.rightArm.addChild(this.fingerR5);
-        this.rightArm.addChild(this.fingerR4);
-        this.column1.addChild(this.column3);
-        this.leftArm.addChild(this.fingerL3);
-        this.leftArm.addChild(this.fingerL1);
-        this.rightArm.addChild(this.fingerR3);
-        this.rightArm.addChild(this.fingerR1);
-        this.column1.addChild(this.column2);
-        this.leftArm.addChild(this.fingerL4);
-        this.leftArm.addChild(this.fingerL2);
+        bipedHead = new ModelRenderer(this);
+        bipedHead.setRotationPoint(0.0F, 0.0F, 0.0F);
+        bipedHead.setTextureOffset(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+
+        leftPart = new ModelRenderer(this);
+        leftPart.setRotationPoint(0.0F, 4.0F, 0.0F);
+        leftPart.setTextureOffset(16, 16).addBox(0.0F, -4.0F, -2.0F, 4.0F, 7.0F, 4.0F, 0.0F, true);
+
+        bipedLeftArm = new ModelRenderer(this);
+        bipedLeftArm.setRotationPoint(4.0F, -3.0F, 0.0F);
+        leftPart.addChild(bipedLeftArm);
+        bipedLeftArm.setTextureOffset(40, 16).addBox(0.0F, -1.0F, -1.0F, 2.0F, 12.0F, 2.0F, 0.0F, false);
+
+        rightPart = new ModelRenderer(this);
+        rightPart.setRotationPoint(0.0F, 4.0F, 0.0F);
+        rightPart.setTextureOffset(16, 16).addBox(-4.0F, -4.0F, -2.0F, 4.0F, 7.0F, 4.0F, 0.0F, false);
+
+        bipedRightArm = new ModelRenderer(this);
+        bipedRightArm.setRotationPoint(-4.0F, -3.0F, 0.0F);
+        rightPart.addChild(bipedRightArm);
+        bipedRightArm.setTextureOffset(40, 16).addBox(-2.0F, -1.0F, -1.0F, 2.0F, 12.0F, 2.0F, 0.0F, false);
+
+        hip = new ModelRenderer(this);
+        hip.setRotationPoint(0.0F, 24.0F, 0.0F);
+        hip.setTextureOffset(16, 26).addBox(-4.0F, -14.0F, -2.0F, 8.0F, 2.0F, 4.0F, 0.0F, false);
     }
 
     @Override
-    public void render(@Nonnull MatrixStack matrixStackIn, @Nonnull IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha)
+    public void render(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
     {
-
-        ImmutableList.of(this.rightArm, this.head, this.leftArm, this.core, this.column1).forEach((modelRenderer) -> modelRenderer.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha));
-
-        for (LibsModel libsModel : this.libsModels)
-            libsModel.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-
+        matrixStack.scale(1.3F,1.3F,1.3F);
+        bipedHeadwear.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        bipedHead.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        leftPart.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        rightPart.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        hip.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
     }
 
     @Override
-    public void setRotationAngles(@Nonnull SoulMasterEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
+    public void setRotationAngles(SoulMasterEntity soulMaster, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
     {
-        this.head.rotateAngleY = netHeadYaw * ((float) Math.PI / 180F);
-        this.head.rotateAngleX = headPitch * ((float) Math.PI / 180F);
+        float partialTicks = ClientEvents.getPartialTicks();
 
-        this.rightArm.rotationPointY = MathHelper.cos(ageInTicks * 0.2F) * 0.35F;
-        this.leftArm.rotationPointY = MathHelper.cos(ageInTicks * 0.2F) * 0.35F;
+        this.bipedHead.rotateAngleY = netHeadYaw * ((float)Math.PI / 180F);
+        this.bipedHead.rotateAngleX = headPitch * ((float)Math.PI / 180F);
+        this.bipedHead.rotateAngleZ = 0F;
 
-        this.rightArm.rotateAngleX = (float)Math.PI / 2F;
+        this.bipedRightArm.rotateAngleX = 0.0F;
+        this.bipedLeftArm.rotateAngleX = 0.0F;
+        this.bipedRightArm.rotateAngleY = 0.0F;
+        this.bipedLeftArm.rotateAngleY = 0.0F;
+        this.bipedRightArm.rotateAngleZ = 0.0F;
+        this.bipedLeftArm.rotateAngleZ = 0.0F;
+        ModelHelper.func_239101_a_(this.bipedRightArm, this.bipedLeftArm, ageInTicks);
 
-        this.core.rotateAngleX = (entityIn.ticksExisted + ageInTicks) * 0.1F;
-        this.core.rotateAngleY = (entityIn.ticksExisted + ageInTicks) * 0.1F;
+        this.rightPart.rotateAngleY = 0F;
+        this.leftPart.rotateAngleY = 0F;
+        this.rightPart.rotateAngleZ = 0F;
+        this.leftPart.rotateAngleZ = 0F;
+        this.hip.rotateAngleY = 0F;
 
-        for (LibsModel libsModel : this.libsModels)
-            libsModel.setRotationAngles(entityIn,limbSwing,limbSwingAmount,ageInTicks,netHeadYaw,headPitch);
+        if(soulMaster.hurtTime > 0)
+        {
+            float hurtTime =  MathHelper.lerp(partialTicks, soulMaster.prevHurtTime, soulMaster.hurtTime);
+            float progress = ((float) soulMaster.maxHurtTime - hurtTime) / (soulMaster.maxHurtTime * 0.5F);
+            float f = -progress * progress + 2 * progress;
+
+            Random random = new Random(soulMaster.hurtSeed);
+            this.bipedHead.rotateAngleY += f * 0.6F * (1D - random.nextDouble() * 2D);
+            this.bipedHead.rotateAngleX += f * 0.6F * (1D - random.nextDouble() * 2D);
+            this.bipedHead.rotateAngleZ += f * 0.6F *  (1D - random.nextDouble() * 2D);
+
+            this.rightPart.rotateAngleY += f * 0.4F *  (1D - random.nextDouble() * 2D);
+            this.leftPart.rotateAngleY += f * 0.4F *  (1D - random.nextDouble() * 2D);
+
+            this.rightPart.rotateAngleZ += f * 0.1F *  (1D - random.nextDouble() * 2D);
+            this.leftPart.rotateAngleZ += f * 0.1F *  (1D - random.nextDouble() * 2D);
+
+            this.hip.rotateAngleY += f * 0.6F *  (1D - random.nextDouble() * 2D);
+
+
+        }
+
+        if(soulMaster.ARROW_SUMMONING.getCurrentTick() > 0)
+        {
+            float t = soulMaster.ARROW_SUMMONING.getProgress(partialTicks);
+
+            this.bipedRightArm.rotateAngleX = -t * 1.63F;
+            this.bipedLeftArm.rotateAngleX = -t * 1.63F;
+
+            this.bipedRightArm.rotateAngleY = -t * 0.2F;
+            this.bipedLeftArm.rotateAngleY = t * 0.2F;
+
+        }
+
+        if(soulMaster.HAND_COMMAND_ARROW.getCurrentTick() > 0)
+        {
+            float t = soulMaster.HAND_COMMAND_ARROW.getProgress(partialTicks);
+            this.bipedRightArm.rotateAngleX = -t * 2.234F;
+            this.rightPart.rotateAngleY = -t * 0.7F;
+        }
+
+        if(soulMaster.PUPPETS_ANIMATION.getCurrentTick() > 0)
+        {
+            float t = soulMaster.PUPPETS_ANIMATION.getProgress(partialTicks);
+
+            this.rightPart.rotateAngleY = t * 0.65F;
+            this.leftPart.rotateAngleY = -t * 0.65F;
+            this.bipedRightArm.rotateAngleX = -t * 0.64F;
+            this.bipedLeftArm.rotateAngleX = -t * 0.64F;
+            this.bipedHead.rotateAngleX = -t * 0.5F;
+        }
+
+
+
+        if(soulMaster.deathTime > 0)
+        {
+            float t = MathHelper.lerp(partialTicks, soulMaster.prevDeathTime, soulMaster.deathTime) / 39F;
+
+            float frequency = t * 2.3F;
+            bipedHead.rotateAngleX = -t * 0.7F;
+
+            bipedRightArm.rotateAngleX = -t * 2.5F;
+            bipedLeftArm.rotateAngleX = -t * 2.5F;
+
+            bipedRightArm.rotateAngleY = MathHelper.sin(ageInTicks * (frequency + 0.3F)) * 0.14F;
+            bipedLeftArm.rotateAngleY = MathHelper.sin(ageInTicks * (frequency + 0.1F)) * 0.1F;
+
+            bipedHead.rotateAngleY = MathHelper.sin(ageInTicks * (frequency - 0.15F)) * 0.1F;
+            bipedHead.rotateAngleZ = MathHelper.sin(ageInTicks * (frequency + 0.14F)) * 0.13F;
+
+        }
+
+
     }
 
-    /**
-     * This is a helper function from Tabula to set the rotation of model parts
-     */
-    public void setRotateAngle(ModelRenderer modelRenderer, float x, float y, float z)
+    public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z)
     {
         modelRenderer.rotateAngleX = x;
         modelRenderer.rotateAngleY = y;
         modelRenderer.rotateAngleZ = z;
     }
 
-    private static class LibsModel
-    {
-
-        public ModelRenderer LeftLib1;
-        public ModelRenderer RightLib1;
-        public ModelRenderer LeftLib2;
-        public ModelRenderer RightLib2;
-
-        private final int position;
 
 
-        private LibsModel(SoulMasterModel model,int position)
-        {
-            this.position = position;
 
-            float y = position * 1.5F;
-
-            this.LeftLib1 = new ModelRenderer(model, 51, 8);
-            this.LeftLib1.mirror = true;
-            this.LeftLib1.setRotationPoint(1.5F, 4.0F + y, 1.5F);
-            this.LeftLib1.addBox(-0.5F, 0.0F, -3.0F, 1.0F, 1.0F, 3.0F, 0.0F, 0.0F, 0.0F);
-            model.setRotateAngle(LeftLib1, 0.0F, -0.8F, 0.0F);
-
-            this.RightLib1 = new ModelRenderer(model, 51, 8);
-            this.RightLib1.mirror = true;
-            this.RightLib1.setRotationPoint(-1.5F, 4.0F + y, 1.5F);
-            this.RightLib1.addBox(-0.5F, 0.0F, -3.0F, 1.0F, 1.0F, 3.0F, 0.0F, 0.0F, 0.0F);
-            model.setRotateAngle(RightLib1, 0.0F, 0.8F, 0.0F);
-
-            this.LeftLib2 = new ModelRenderer(model, 51, 8);
-            this.LeftLib2.setRotationPoint(-3.0F, 0.0F, 0.5F);
-            this.LeftLib2.addBox(3.0F, 0.0F, 0.0F, 1.0F, 1.0F, 3.0F, 0.0F, 0.0F, 0.0F);
-            model.setRotateAngle(LeftLib2, 0.0F, 1.8325957145940461F, 0.0F);
-
-            this.RightLib2 = new ModelRenderer(model, 51, 8);
-            this.RightLib2.setRotationPoint(0.0F, 0.0F, 0.0F);
-            this.RightLib2.addBox(3.0F, 0.0F, 0.0F, 1.0F, 1.0F, 3.0F, 0.0F, 0.0F, 0.0F);
-            model.setRotateAngle(RightLib2, 0.0F, 1.3634512595948698F, 0.0F);
-
-            this.RightLib1.addChild(this.RightLib2);
-            this.LeftLib1.addChild(this.LeftLib2);
-        }
-
-        public void render(@Nonnull MatrixStack matrixStackIn, @Nonnull IVertexBuilder bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha)
-        {
-            matrixStackIn.push();
-
-            float f = 1F - (Math.abs(2 - position) / 9F);
-
-
-            float scale = 0.6F + 0.2F * f;
-
-          //  matrixStackIn.translate(0F,f,0F);
-            matrixStackIn.scale(scale,scale,scale);
-
-            this.LeftLib1.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-            this.RightLib1.render(matrixStackIn, bufferIn, packedLightIn, packedOverlayIn, red, green, blue, alpha);
-
-
-            matrixStackIn.pop();
-
-        }
-
-        public void setRotationAngles(@Nonnull SoulMasterEntity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch)
-        {
-            this.LeftLib1.rotateAngleY = -0.8F;
-            this.RightLib1.rotateAngleY = 0.8F;
-        }
-    }
 }

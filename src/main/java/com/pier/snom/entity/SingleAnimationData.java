@@ -1,13 +1,13 @@
 package com.pier.snom.entity;
 
-import net.minecraft.world.World;
+import com.pier.snom.utils.AnimationData;
 
-public class SingleAnimationData<T extends DungeonBossEntity> extends EntityAnimationData<T>
+public class SingleAnimationData extends AnimationData
 {
     private final int duration;
-    public SingleAnimationData(T entity, int duration)
+    public SingleAnimationData(int duration,int index)
     {
-        super(entity);
+        super(index);
         this.duration = duration;
     }
 
@@ -18,9 +18,9 @@ public class SingleAnimationData<T extends DungeonBossEntity> extends EntityAnim
     }
 
     @Override
-    public void update(World world)
+    public void update()
     {
-        super.update(world);
+        super.update();
         if(this.currentTick > 0)
             --this.currentTick;
     }

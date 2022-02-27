@@ -1,7 +1,7 @@
 package com.pier.snom.block;
 
 import com.pier.snom.SoulnomiconMain;
-import com.pier.snom.client.particle.SoulPlayerParticleData;
+import com.pier.snom.client.particle.ModParticles;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
@@ -71,9 +71,8 @@ public class DungeonBlock extends Block
             d0 = (double)i + axisalignedbb.maxX + (double)0.1F;
         }
 
-        SoulPlayerParticleData soulPlayerParticleData = new SoulPlayerParticleData();
 
-        manager.addParticle(soulPlayerParticleData, d0, d1, d2, 0.0D, 0.0D, 0.0D);
+        manager.addParticle(ModParticles.SOUL_FLAME, d0, d1, d2, 0.0D, 0.0D, 0.0D);
         return true;
     }
 

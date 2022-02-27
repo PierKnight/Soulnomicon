@@ -8,7 +8,6 @@ import net.minecraft.block.Block;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.item.Item;
 import net.minecraft.particles.ParticleType;
 import net.minecraft.tileentity.TileEntityType;
@@ -56,7 +55,7 @@ public class ModRegistry
     @SubscribeEvent
     public static void onParticlesRegistry(final RegistryEvent.Register<ParticleType<?>> event)
     {
-       // ModParticles.registerParticleTypes(event.getRegistry());
+        ModParticles.registerParticleTypes(event.getRegistry());
     }
 
     @SubscribeEvent
@@ -92,7 +91,7 @@ public class ModRegistry
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event)
     {
-        event.put(EntityRegistry.SOUL_MASTER_ENTITY, ZombieEntity.func_234342_eQ_().create());
+        EntityRegistry.registerMobAttributes(event);
     }
 
 }

@@ -12,7 +12,8 @@ import net.minecraftforge.registries.IForgeRegistry;
 public class ModParticles
 {
 
-    static SoulPlayerParticleData SOUL_FLAME = new SoulPlayerParticleData();
+
+    public static BasicParticleType SOUL_FLAME = new ModParticleType("soul_flame");
 
     public static void registerParticleTypes(IForgeRegistry<ParticleType<?>> registry)
     {
@@ -25,7 +26,6 @@ public class ModParticles
         ParticleManager particleManager = Minecraft.getInstance().particles;
         particleManager.registerFactory(SOUL_FLAME, SoulFlameParticle.Factory::new);
     }
-
 
     public static class ModParticleType extends BasicParticleType
     {

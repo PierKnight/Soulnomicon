@@ -1,6 +1,7 @@
 package com.pier.snom;
 
 import com.pier.snom.capability.SoulPlayerProvider;
+import com.pier.snom.entity.soulmaster.SoulMasterEntity;
 import com.pier.snom.network.PacketManager;
 import com.pier.snom.network.client.PacketUpdateCapability;
 import net.minecraft.entity.Entity;
@@ -9,6 +10,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
@@ -71,8 +73,6 @@ public class ModEvents
     }
 
 
-
-
     @SubscribeEvent
     public static void onPlayerLogIn(PlayerEvent.PlayerLoggedInEvent event)
     {
@@ -129,6 +129,15 @@ public class ModEvents
             PlayerEntity player = event.player;
             player.getCapability(SoulPlayerProvider.SOUL_PLAYER_CAPABILITY).ifPresent(soulPlayer -> soulPlayer.update(player));
         }
+    }
+
+
+    @SubscribeEvent
+    public static void soulMasterArrowHelper(ProjectileImpactEvent.Arrow event)
+    {
+        Entity owner = event.getArrow().func_234616_v_();
+        if(owner instanceof SoulMasterEntity)
+            event.getArrow().remove();
     }
 
 

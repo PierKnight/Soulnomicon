@@ -1,61 +1,97 @@
 package com.pier.snom.entity.soulmaster;
 
-import com.pier.snom.entity.*;
-import net.minecraft.entity.EntitySize;
+import com.pier.snom.client.particle.ModParticles;
+import com.pier.snom.client.particle.SoulLeakingParticle;
+import com.pier.snom.entity.AttackGoal;
+import com.pier.snom.entity.DungeonBossEntity;
+import com.pier.snom.entity.SingleAnimationData;
+import com.pier.snom.utils.AnimationData;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.ai.goal.LookAtGoal;
-import net.minecraft.entity.ai.goal.LookRandomlyGoal;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
-import net.minecraft.entity.effect.LightningBoltEntity;
-import net.minecraft.entity.passive.CowEntity;
+import net.minecraft.entity.monster.MonsterEntity;
+import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.entity.projectile.SmallFireballEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.BossInfo;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerBossInfo;
-import org.apache.commons.lang3.ArrayUtils;
+import net.minecraftforge.common.ForgeMod;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.List;
 
 public class SoulMasterEntity extends DungeonBossEntity
 {
 
-    private final ServerBossInfo bossInfo = (ServerBossInfo)(new ServerBossInfo(this.getDisplayName(), BossInfo.Color.WHITE, BossInfo.Overlay.PROGRESS)).setDarkenSky(true);
+    //ai attacks
+    private final ArrowCageGoal arrowCage = new ArrowCageGoal(this);
+    private final ArrowSummonGoal arrowAttack = new ArrowSummonGoal(this);
+    private final SkeletonPuppetsGoal skeletonPuppets = new SkeletonPuppetsGoal(this);
+
+    //animations
+    public final ArrowSummonAnimationData ARROW_SUMMONING = new ArrowSummonAnimationData(this, 0);
+    public final SingleAnimationData HAND_COMMAND_ARROW = new SingleAnimationData(13, 1);
+    public final SkeletonPuppetsAnimation PUPPETS_ANIMATION = new SkeletonPuppetsAnimation(this, 2);
+    public int isShakingForLosingControl = 0;
+    protected final AnimationData[] ANIMATIONS = new AnimationData[]{ARROW_SUMMONING, HAND_COMMAND_ARROW, PUPPETS_ANIMATION};
+
+    public int hurtSeed;
+
 
     public SoulMasterEntity(EntityType<? extends SoulMasterEntity> type, World worldIn)
     {
         super(type, worldIn);
     }
 
-    public SoulMasterEntity(World worldIn) {
-        this(EntityRegistry.SOUL_MASTER_ENTITY, worldIn);
-    }
-
-    @Override
-    public boolean hasNoGravity()
-    {
-        return true;
-    }
-
     @Override
     protected void registerGoals()
     {
-        this.goalSelector.addGoal(6, new LookAtGoal(this, PlayerEntity.class, 16.0F));
-        this.goalSelector.addGoal(7, new LookRandomlyGoal(this));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, CowEntity.class, false));
-        this.targetSelector.addGoal(3,new SoulMasterAttackPatternGoal(this));
+        this.targetSelector.addGoal(5, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, false));
     }
+
+    public static AttributeModifierMap.MutableAttribute getAttributes()
+    {
+        return MonsterEntity.registerAttributes().createMutableAttribute(Attributes.FOLLOW_RANGE, 48D).createMutableAttribute(Attributes.MOVEMENT_SPEED, 0.4D).createMutableAttribute(Attributes.MAX_HEALTH, 200D).createMutableAttribute(Attributes.KNOCKBACK_RESISTANCE, 99999D).createMutableAttribute(Attributes.FLYING_SPEED, 1D).createMutableAttribute(ForgeMod.ENTITY_GRAVITY.get(), 0D);
+    }
+
+    @Override
+    public void livingTick()
+    {
+        super.livingTick();
+        if(world.isRemote && !this.getShouldBeDead())
+        {
+            int shakeChance = (int)((0.5F - this.getHealth() / this.getMaxHealth()) * 30);
+
+            if(this.isInSecondPhase() && this.isShakingForLosingControl == 0 && shakeChance > 0 && this.rand.nextInt(shakeChance) == 0)
+                this.isShakingForLosingControl = 10 + this.rand.nextInt(20);
+            if(this.isShakingForLosingControl > 0)
+                --this.isShakingForLosingControl;
+        }
+    }
+
+    @Override
+    public boolean attackEntityFrom(@Nonnull DamageSource source, float amount)
+    {
+        if(this.hurtTime == 0)
+            this.hurtSeed = this.rand.nextInt();
+
+        //cannot be hit from hitself and skeletons
+        if(source.getTrueSource() == this || source.getTrueSource() instanceof SkeletonEntity)
+            return false;
+
+        //damage reduction during skeleton attack
+        if(this.attackGoal == skeletonPuppets)
+            amount *= 0.5F;
+
+        return super.attackEntityFrom(source, amount);
+    }
+
 
     @Override
     public boolean canBePushed()
@@ -64,150 +100,172 @@ public class SoulMasterEntity extends DungeonBossEntity
     }
 
     @Override
-    public ActionResultType applyPlayerInteraction(@Nonnull PlayerEntity player,@Nonnull Vector3d vec,@Nonnull Hand hand)
+    protected void collideWithNearbyEntities() {}
+
+    @Override
+    public void applyKnockback(float x, double y, double z)
     {
-        this.playAnimation(0);
-        return super.applyPlayerInteraction(player, vec, hand);
     }
 
     @Override
-    protected void updateAITasks()
+    protected void onBossDeath()
     {
-        super.updateAITasks();
-        this.bossInfo.setPercent(this.getHealth() / this.getMaxHealth());
-    }
-
-    @Override
-    public boolean isNonBoss()
-    {
-        return false;
-    }
-
-    public void setCustomName(@Nullable ITextComponent name) {
-        super.setCustomName(name);
-        this.bossInfo.setName(this.getDisplayName());
-    }
-
-    @Override
-    public void addTrackingPlayer(@Nonnull ServerPlayerEntity player)
-    {
-        super.addTrackingPlayer(player);
-        this.bossInfo.addPlayer(player);
-    }
-
-    @Override
-    public void removeTrackingPlayer(@Nonnull ServerPlayerEntity player)
-    {
-        super.removeTrackingPlayer(player);
-        this.bossInfo.removePlayer(player);
-    }
-
-    @Override
-    protected float getStandingEyeHeight(Pose poseIn, EntitySize sizeIn)
-    {
-
-        return super.getStandingEyeHeight(poseIn, sizeIn);
-    }
-
-    @Override
-    public void writeAdditional(@Nonnull CompoundNBT compound)
-    {
-        super.writeAdditional(compound);
-    }
-
-    @Override
-    public void readAdditional(@Nonnull CompoundNBT compound)
-    {
-        super.readAdditional(compound);
-
-        if (this.hasCustomName())
-            this.bossInfo.setName(this.getDisplayName());
-
-    }
-
-
-    public static final int LIGHTNING_ATTACK = 0;
-    public static final int FIREBALL_SPAM = 1;
-    public static final int[] ATTACKS = {LIGHTNING_ATTACK,FIREBALL_SPAM};
-
-    @Override
-    protected EntityAnimationData<SoulMasterEntity>[] getAnimations()
-    {
-        return ArrayUtils.toArray(new LightningAttack(this),new FireBallSpam(this));
-    }
-
-    private static class LightningAttack extends SingleAnimationData<SoulMasterEntity> implements IAnimationAttack
-    {
-
-        public LightningAttack(SoulMasterEntity entity)
+        if(world.isRemote)
         {
-            super(entity, 30);
-        }
-
-        @Override
-        public void update(World world)
-        {
-            super.update(world);
-            LivingEntity target = getTarget();
-            if(target != null)
+            for (int i = 0; i < 15; i++)
             {
-                //System.out.println(this.currentTick);
-                if(this.currentTick == 10)
-                {
-                    LightningBoltEntity bolt = new LightningBoltEntity(EntityType.LIGHTNING_BOLT,world);
-                    bolt.setEffectOnly(false);
-                    bolt.setPositionAndUpdate(target.getPosX(),target.getPosY(),target.getPosZ());
-                    world.addEntity(bolt);
-                }
+                double d0 = this.getPosX() + (this.rand.nextDouble() - this.rand.nextDouble()) * this.getBoundingBox().getXSize();
+                double d1 = this.getPosY() + (this.rand.nextDouble() - this.rand.nextDouble()) * this.getBoundingBox().getYSize();
+                double d2 = this.getPosZ() + (this.rand.nextDouble() - this.rand.nextDouble()) * this.getBoundingBox().getZSize();
+                Minecraft.getInstance().particles.addEffect(new SoulLeakingParticle((ClientWorld) world, 0, d0, d1, d2, 0.2D + this.rand.nextDouble() * 0.25D));
             }
+            Minecraft.getInstance().particles.addEffect(new SoulLeakingParticle.SoulMasterPiece((ClientWorld) world, this.getPosX(), this.getPosYEye(), this.getPosZ(), 0.25D, 0));
+            Minecraft.getInstance().particles.addEffect(new SoulLeakingParticle.SoulMasterPiece((ClientWorld) world, this.getPosX(), this.getPosY() + this.getBoundingBox().getYSize() * 0.5D, this.getPosZ(), 0.2D, 1));
+            Minecraft.getInstance().particles.addEffect(new SoulLeakingParticle.SoulMasterPiece((ClientWorld) world, this.getPosX(), this.getPosY() + this.getBoundingBox().getYSize() * 0.5D, this.getPosZ(), 0.2D, 2));
+            Minecraft.getInstance().particles.addEffect(new SoulLeakingParticle.SoulMasterPiece((ClientWorld) world, this.getPosX(), this.getPosY() + this.getBoundingBox().getYSize() * 0.3D, this.getPosZ(), 0.2D, 3));
+
         }
-        @Override
-        public boolean isFinished()
-        {
-            return this.currentTick == 0;
-        }
+        super.onBossDeath();
+
     }
 
-    private static class FireBallSpam extends SingleAnimationData<SoulMasterEntity> implements IAnimationAttack
+    @Override
+    protected AttackGoal<SoulMasterEntity> getNextAttackGoal()
     {
+        return this.rand.nextBoolean() ? (this.rand.nextBoolean() ? this.skeletonPuppets : this.arrowAttack) : this.arrowCage;
+    }
 
-        public FireBallSpam(SoulMasterEntity entity)
+    @Override
+    protected AnimationData[] getAnimations()
+    {
+        return ANIMATIONS;
+    }
+
+    public static class ArrowSummonAnimationData extends AnimationData
+    {
+        private final SoulMasterEntity soulMaster;
+        private boolean started = false;
+
+        public ArrowSummonAnimationData(SoulMasterEntity soulMaster, int index)
         {
-            super(entity, 20);
+            super(index);
+            this.soulMaster = soulMaster;
         }
 
         @Override
-        public void update(World world)
+        public void play()
         {
-            super.update(world);
-            LivingEntity target = getTarget();
-            if(target != null)
-            {
-                if(this.currentTick % 2 == 0)
-                {
-                    Vector3d entityPos = entity.getEyePosition(1.0F);
-                    Vector3d targetPos = target.getBoundingBox().getCenter();
-                    Vector3d direction = targetPos.subtract(entityPos).normalize();
-                    double distance = entityPos.distanceTo(targetPos);
-                    double aim = distance * 0.01D;
-                    double offsetX = aim - aim * 2 * entity.getRNG().nextDouble();
-                    double offsetZ = aim - aim * 2 * entity.getRNG().nextDouble();
-                    SmallFireballEntity smallFireballEntity = new SmallFireballEntity(world,entity,direction.x + offsetX,direction.y,direction.z + offsetZ);
-                    smallFireballEntity.setPositionAndUpdate(entityPos.x,entityPos.y,entityPos.z);
-                    world.addEntity(smallFireballEntity);
+            if(this.started)
+                this.currentTick = 0;
+            this.started = !this.started;
+        }
 
-                    world.playSound(null,entityPos.x,entityPos.y,entityPos.z, SoundEvents.ENTITY_BLAZE_SHOOT, SoundCategory.HOSTILE, 1F,1F + entity.getRNG().nextFloat() * 0.2F);
-                }
+        @Override
+        public void update()
+        {
+            super.update();
+            if(this.started)
+            {
+                if(this.currentTick < 20F)
+                    this.currentTick++;
+            }
+            else if(this.currentTick > 0)
+                this.currentTick -= 5;
+
+            if(this.started)
+            {
+                Vector3d vector3d = new Vector3d(1, 1, 0);
+                float X = this.soulMaster.ticksExisted * 0.209F;
+                float Y = (this.soulMaster.rotationYawHead + 90F) / 180F * (float) Math.PI;
+                float Z = -this.soulMaster.rotationPitch / 180F * (float) Math.PI;
+                float cosX = MathHelper.cos(X);
+                float sinX = MathHelper.sin(X);
+                float cosY = MathHelper.cos(Y);
+                float sinY = MathHelper.sin(Y);
+                float cosZ = MathHelper.cos(Z);
+                float sinZ = MathHelper.sin(Z);
+                double x = dotProduct(vector3d, cosZ, -sinZ * cosX, sinZ * sinX);
+                double y = dotProduct(vector3d, sinZ, cosZ * cosX, -cosZ * sinX);
+                double z = dotProduct(vector3d, 0, sinX, cosX);
+                double finalX = x * cosY - z * sinY;
+                double finalZ = x * sinY + z * cosY;
+                Vector3d point = this.soulMaster.getEyePosition(1.0F).add(finalX, y, finalZ);
+                this.soulMaster.world.addParticle(ModParticles.SOUL_FLAME, true, point.x, point.y, point.z, 0, 0, 0);
             }
         }
 
-        @Override
-        public boolean isFinished()
+
+        private double dotProduct(Vector3d vec, double a, double b, double c)
         {
-            return this.currentTick == 0;
+            return vec.x * a + vec.y * b + vec.z * c;
+        }
+
+        public boolean isStarted() {
+            return this.started;
+        }
+
+        @Override
+        public float getProgress(float partialTicks)
+        {
+            return MathHelper.lerp(partialTicks, prevTick, currentTick) / 20F;
         }
     }
 
+    public static class SkeletonPuppetsAnimation extends AnimationData
+    {
+        private final SoulMasterEntity soulMaster;
+        private boolean started = false;
+
+        public SkeletonPuppetsAnimation(SoulMasterEntity soulMaster, int index)
+        {
+            super(index);
+            this.soulMaster = soulMaster;
+        }
+
+        @Override
+        public void play()
+        {
+            this.started = !this.started;
+        }
+
+        public boolean isStarted() {return this.started;}
+
+        @Override
+        public void update()
+        {
+            super.update();
+            if(this.started)
+            {
+                if(this.currentTick < 25)
+                    this.currentTick++;
+
+
+                if(this.soulMaster.world.isRemote)
+                {
+                    List<SkeletonEntity> list = this.soulMaster.world.getEntitiesWithinAABB(SkeletonEntity.class, this.soulMaster.getBoundingBox().grow(20), entity -> entity.getCustomName() instanceof StringTextComponent);
+                    for (SkeletonEntity entity : list)
+                    {
+                        Vector3d pos = this.soulMaster.getPositionVec().add(0, 1.5D, 0);
+                        Vector3d direction = entity.getBoundingBox().getCenter().subtract(pos);
+
+                        for (int i = 0; i <= 10; i++)
+                        {
+                            Vector3d point = pos.add(direction.scale(i / 10D));
+                            this.soulMaster.world.addParticle(ParticleTypes.SOUL_FIRE_FLAME, true, point.x, point.y, point.z, 0, 0, 0);
+                        }
+                    }
+                }
+            }
+            else if(this.currentTick > 0)
+                this.currentTick -= 1;
+        }
+
+        @Override
+        public float getProgress(float partialTicks)
+        {
+            return MathHelper.lerp(partialTicks, prevTick, currentTick) / 25F;
+        }
+    }
 
 
 }

@@ -1,13 +1,11 @@
 package com.pier.snom.client.particle;
 
 import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particles.BasicParticleType;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -104,29 +102,24 @@ public class SoulFlameParticle extends SpriteTexturedParticle
     @Override
     public void renderParticle(@Nonnull IVertexBuilder buffer, @Nonnull ActiveRenderInfo renderInfo, float partialTicks)
     {
-        PlayerEntity player = Minecraft.getInstance().player;
-
-        double distance = player != null ? player.getEyePosition(partialTicks).distanceTo(new Vector3d(this.posX,this.posY,this.posZ)) : 0D;
-
-        if(renderInfo.isThirdPerson() || distance > 1D)
-            super.renderParticle(buffer, renderInfo, partialTicks);
+        super.renderParticle(buffer, renderInfo, partialTicks);
     }
 
 
     @OnlyIn(Dist.CLIENT)
-    public static class Factory implements IParticleFactory<SoulPlayerParticleData>
+    public static class Factory implements IParticleFactory<BasicParticleType>
     {
 
         private final IAnimatedSprite spriteSet;
 
-        public Factory(IAnimatedSprite p_i50823_1_)
+        public Factory(IAnimatedSprite animatedSprite)
         {
-            this.spriteSet = p_i50823_1_;
+            this.spriteSet = animatedSprite;
         }
 
         @Nullable
         @Override
-        public Particle makeParticle(SoulPlayerParticleData typeIn, ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        public Particle makeParticle(@Nonnull BasicParticleType typeIn, @Nonnull ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
             SoulFlameParticle flameParticle = new SoulFlameParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, this.spriteSet);
             flameParticle.selectSpriteWithAge(this.spriteSet);
